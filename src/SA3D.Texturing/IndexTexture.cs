@@ -139,27 +139,6 @@ namespace SA3D.Texturing
 
 
 		/// <summary>
-		/// Write the indexed texture to a PNG file.
-		/// </summary>
-		/// <param name="filepath">The path to the file to write to.</param>
-		/// <param name="storeInAlpha">Whether the index should be stored in the alpha channel, instead of outputing a grayscale image.</param>
-		public void WriteIndexedToPNGFile(string filepath, bool storeInAlpha)
-		{
-			WriteIndexedToPNGFileStream(File.OpenWrite(filepath), storeInAlpha);
-		}
-
-		/// <summary>
-		/// Encode the indexed texture as a PNG file.
-		/// </summary>
-		/// <param name="storeInAlpha">Whether the index should be stored in the alpha channel, instead of outputing a grayscale image.</param>
-		public byte[] WriteIndexedToPNGFileData(bool storeInAlpha)
-		{
-			using MemoryStream stream = new();
-			WriteIndexedToPNGFileStream(stream, storeInAlpha);
-			return stream.ToArray();
-		}
-
-		/// <summary>
 		/// Encode the indexed texture as a PNG/DDS file.
 		/// </summary>
 		/// <param name="stream">The file data stream to write to.</param>
@@ -182,25 +161,32 @@ namespace SA3D.Texturing
 			}
 		}
 
-
 		/// <summary>
-		/// Write the indexed texture to a DDS file.
+		/// Write the indexed texture to a PNG file.
 		/// </summary>
 		/// <param name="filepath">The path to the file to write to.</param>
-		public void WriteIndexedToDDSFile(string filepath)
+		/// <param name="storeInAlpha">Whether the index should be stored in the alpha channel, instead of outputing a grayscale image.</param>
+		public void WriteIndexedToPNGFile(string filepath, bool storeInAlpha)
 		{
-			WriteIndexedToDDSFileStream(File.OpenWrite(filepath));
+			using(FileStream stream = File.Create(filepath))
+			{
+				WriteIndexedToPNGFileStream(stream, storeInAlpha);
+			}
 		}
 
 		/// <summary>
-		/// Encode the indexed texture as a DDS file.
+		/// Encode the indexed texture as a PNG file.
 		/// </summary>
-		public byte[] WriteIndexedToDDSFileData()
+		/// <param name="storeInAlpha">Whether the index should be stored in the alpha channel, instead of outputing a grayscale image.</param>
+		public byte[] WriteIndexedToPNGFileData(bool storeInAlpha)
 		{
-			using MemoryStream stream = new();
-			WriteIndexedToDDSFileStream(stream);
-			return stream.ToArray();
+			using(MemoryStream stream = new())
+			{
+				WriteIndexedToPNGFileStream(stream, storeInAlpha);
+				return stream.ToArray();
+			}
 		}
+
 
 		/// <summary>
 		/// Encode the indexed texture as a DDS file.
@@ -220,38 +206,30 @@ namespace SA3D.Texturing
 			Palette = prevPalette;
 		}
 
-
 		/// <summary>
-		/// Verifies whether a file is readable as an index texture.
-		/// <br/> Does not alter the stream position.
+		/// Write the indexed texture to a DDS file.
 		/// </summary>
-		/// <param name="filepath">Path from which the file should be read.</param>
-		/// <param name="index4">Whether the file stores 4 bit indices.</param>
-		/// <param name="storedInAlpha">Whether the index data is stored in alpha.</param>
-		/// <returns>Whether the file can be reas as an index texture.</returns>
-		public static bool CheckCanReadIndexedFromFile(string filepath, out bool index4, out bool storedInAlpha)
+		/// <param name="filepath">The path to the file to write to.</param>
+		public void WriteIndexedToDDSFile(string filepath)
 		{
-			using(FileStream stream = File.OpenRead(filepath))
+			using(FileStream stream = File.Create(filepath))
 			{
-				return CheckCanReadIndexedFromFile(stream, out index4, out storedInAlpha);
+				WriteIndexedToDDSFileStream(stream);
 			}
 		}
 
 		/// <summary>
-		/// Verifies whether file data is readable as an index texture.
-		/// <br/> Does not alter the stream position.
+		/// Encode the indexed texture as a DDS file.
 		/// </summary>
-		/// <param name="data">File data to read.</param>
-		/// <param name="index4">Whether the file stores 4 bit indices.</param>
-		/// <param name="storedInAlpha">Whether the index data is stored in alpha.</param>
-		/// <returns>Whether the file can be reas as an index texture.</returns>
-		public static bool CheckCanReadIndexedFromFile(byte[] data, out bool index4, out bool storedInAlpha)
+		public byte[] WriteIndexedToDDSFileData()
 		{
-			using(MemoryStream stream = new(data))
+			using(MemoryStream stream = new())
 			{
-				return CheckCanReadIndexedFromFile(stream, out index4, out storedInAlpha);
+				WriteIndexedToDDSFileStream(stream);
+				return stream.ToArray();
 			}
 		}
+
 
 		/// <summary>
 		/// Verifies whether file data is readable as an index texture.
@@ -329,6 +307,62 @@ namespace SA3D.Texturing
 			}
 		}
 
+		/// <summary>
+		/// Verifies whether a file is readable as an index texture.
+		/// <br/> Does not alter the stream position.
+		/// </summary>
+		/// <param name="filepath">Path from which the file should be read.</param>
+		/// <param name="index4">Whether the file stores 4 bit indices.</param>
+		/// <param name="storedInAlpha">Whether the index data is stored in alpha.</param>
+		/// <returns>Whether the file can be reas as an index texture.</returns>
+		public static bool CheckCanReadIndexedFromFile(string filepath, out bool index4, out bool storedInAlpha)
+		{
+			using(FileStream stream = File.OpenRead(filepath))
+			{
+				return CheckCanReadIndexedFromFile(stream, out index4, out storedInAlpha);
+			}
+		}
+
+		/// <summary>
+		/// Verifies whether file data is readable as an index texture.
+		/// <br/> Does not alter the stream position.
+		/// </summary>
+		/// <param name="data">File data to read.</param>
+		/// <param name="index4">Whether the file stores 4 bit indices.</param>
+		/// <param name="storedInAlpha">Whether the index data is stored in alpha.</param>
+		/// <returns>Whether the file can be reas as an index texture.</returns>
+		public static bool CheckCanReadIndexedFromFile(byte[] data, out bool index4, out bool storedInAlpha)
+		{
+			using(MemoryStream stream = new(data))
+			{
+				return CheckCanReadIndexedFromFile(stream, out index4, out storedInAlpha);
+			}
+		}
+
+
+		/// <summary>
+		/// Attempts to read an indexed texture from a file data stream.
+		/// </summary>
+		/// <param name="stream">The stream to read the file data from.</param>
+		/// <param name="filename">Filename that should be used.</param>
+		/// <param name="result">The read index texture. Null if file was not an index texture</param>
+		/// <returns>Whether the file was successfully read as index texture.</returns>
+		public static bool TryReadIndexedFromFile(Stream stream, string filename, [MaybeNullWhen(false)] out IndexTexture result)
+		{
+			if(CheckCanReadIndexedFromFile(stream, out bool index4, out bool inAlpha))
+			{
+				result = inAlpha
+					? ReadFromFile<A8>(stream, filename, index4)
+					: ReadFromFile<L8>(stream, filename, index4);
+
+				return true;
+			}
+			else
+			{
+				result = null;
+				return false;
+			}
+		}
 
 		/// <summary>
 		/// Attempts to read an indexed texture from a file.
@@ -359,30 +393,23 @@ namespace SA3D.Texturing
 			}
 		}
 
+
 		/// <summary>
-		/// Attempts to read an indexed texture from a file data stream.
+		/// Reads an index texture from a file data stream.
 		/// </summary>
 		/// <param name="stream">The stream to read the file data from.</param>
 		/// <param name="filename">Filename that should be used.</param>
-		/// <param name="result">The read index texture. Null if file was not an index texture</param>
-		/// <returns>Whether the file was successfully read as index texture.</returns>
-		public static bool TryReadIndexedFromFile(Stream stream, string filename, [MaybeNullWhen(false)] out IndexTexture result)
+		/// <returns>The read index texture.</returns>
+		/// <exception cref="InvalidDataException"></exception>
+		public static IndexTexture ReadIndexedFromFile(Stream stream, string filename)
 		{
-			if(CheckCanReadIndexedFromFile(stream, out bool index4, out bool inAlpha))
+			if(TryReadIndexedFromFile(stream, filename, out IndexTexture? result))
 			{
-				result = inAlpha
-					? ReadFromFile<A8>(stream, filename, index4)
-					: ReadFromFile<L8>(stream, filename, index4);
+				return result;
+			}
 
-				return true;
-			}
-			else
-			{
-				result = null;
-				return false;
-			}
+			throw new InvalidDataException("File Data was not able to be read as an index texture.");
 		}
-
 
 		/// <summary>
 		/// Reads an index texture from a file data stream.
@@ -417,22 +444,6 @@ namespace SA3D.Texturing
 			throw new InvalidDataException("File Data was not able to be read as an index texture.");
 		}
 
-		/// <summary>
-		/// Reads an index texture from a file data stream.
-		/// </summary>
-		/// <param name="stream">The stream to read the file data from.</param>
-		/// <param name="filename">Filename that should be used.</param>
-		/// <returns>The read index texture.</returns>
-		/// <exception cref="InvalidDataException"></exception>
-		public static IndexTexture ReadIndexedFromFile(Stream stream, string filename)
-		{
-			if(TryReadIndexedFromFile(stream, filename, out IndexTexture? result))
-			{
-				return result;
-			}
-
-			throw new InvalidDataException("File Data was not able to be read as an index texture.");
-		}
 
 		private static IndexTexture ReadFromFile<TPixel>(Stream stream, string filename, bool isIndex4)
 			where TPixel : unmanaged, IPixel<TPixel>

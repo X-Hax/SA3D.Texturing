@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text;
 
 namespace SA3D.Texturing
 {
@@ -24,21 +23,48 @@ namespace SA3D.Texturing
 			Textures = new(textures);
 		}
 
+
 		/// <summary>
-		/// Returns an index content text used by texture packs.
+		/// Writes a content index used by texture packs to a writer.
+		/// </summary>
+		/// <param name="writer">The writer to write to.</param>
+		/// <param name="nameSuffix">Suffix for every texture name.</param>
+		public void WriteContentIndex(TextWriter writer, string nameSuffix)
+		{
+			foreach(Texture texture in Textures)
+			{
+				writer.WriteLine($"{texture.GlobalIndex},{texture.Name}{nameSuffix},{texture.OverrideWidth}x{texture.OverrideHeight}");
+			}
+		}
+
+		/// <summary>
+		/// Writes a content index used by texture packs to a file.
+		/// </summary>
+		/// <param name="filepath">Path of the file to write to.</param>
+		/// <param name="nameSuffix">Suffix for every texture name.</param>
+		/// <returns>The index contents.</returns>
+		public void WriteContentIndexToFile(string filepath, string nameSuffix)
+		{
+			using(StreamWriter writer = File.CreateText(filepath))
+			{
+				WriteContentIndex(writer, nameSuffix);
+			}
+		}
+
+		/// <summary>
+		/// Generates a content index used by texture packs.
 		/// </summary>
 		/// <param name="nameSuffix">Suffix for every texture name.</param>
 		/// <returns>The index contents.</returns>
-		public string GetIndexContents(string nameSuffix)
+		public string GetContentIndex(string nameSuffix)
 		{
-			StringBuilder sb = new();
-			foreach(Texture texture in Textures)
+			using(StringWriter writer = new())
 			{
-				sb.AppendLine($"{texture.GlobalIndex},{texture.Name}{nameSuffix},{texture.OverrideWidth}x{texture.OverrideHeight}");
+				WriteContentIndex(writer, nameSuffix);
+				return writer.ToString();
 			}
-
-			return sb.ToString();
 		}
+
 
 		/// <summary>
 		/// Exports the texture set as a texture pack useable by sonic adventure modloaders.
@@ -48,7 +74,8 @@ namespace SA3D.Texturing
 		public void ExportTexturePack(string outDirectory, bool useDDS = false)
 		{
 			string extension = useDDS ? ".dds" : ".png";
-			File.WriteAllText(outDirectory + "\\index.txt", GetIndexContents(extension));
+			WriteContentIndexToFile(outDirectory + "\\index.txt", extension);
+
 			foreach(Texture texture in Textures)
 			{
 				string path = $"{outDirectory}\\{texture.Name}{extension}";
@@ -76,6 +103,7 @@ namespace SA3D.Texturing
 				}
 			}
 		}
+
 
 		/// <summary>
 		/// Imports texture from a texture pack useable by sonic adventure modloaders.

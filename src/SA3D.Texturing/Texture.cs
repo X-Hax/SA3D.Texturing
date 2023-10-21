@@ -135,7 +135,10 @@ namespace SA3D.Texturing
 		/// <param name="filepath">Path to the file to read.</param>
 		public static Texture ReadFromFile(string filepath)
 		{
-			return ReadFromFile(File.OpenRead(filepath), Path.GetFileNameWithoutExtension(filepath));
+            using(FileStream stream = File.OpenRead(filepath))
+            {
+			    return ReadFromFile(stream, Path.GetFileNameWithoutExtension(filepath));
+            }
 		}
 
 		/// <summary>
@@ -178,7 +181,10 @@ namespace SA3D.Texturing
 		/// <param name="filepath">Path to the file to write to.</param>
 		public void WriteColoredToPNGFile(string filepath)
 		{
-			WriteColoredToPNGFileStream(File.OpenWrite(filepath));
+            using(FileStream stream = File.Create(filepath))
+            {
+                WriteColoredToPNGFileStream(stream);
+            }
 		}
 
 		/// <summary>
@@ -217,10 +223,13 @@ namespace SA3D.Texturing
 		/// <summary>
 		/// Write the colored texture to a DDS file.
 		/// </summary>
-		/// <param name="file">Path to the file to write to.</param>
-		public void WriteColoredToDDSFile(string file)
+		/// <param name="filepath">Path to the file to write to.</param>
+		public void WriteColoredToDDSFile(string filepath)
 		{
-			WriteColoredToDDSFileStream(File.OpenWrite(file));
+            using(FileStream stream = File.Create(filepath))
+            {
+			    WriteColoredToDDSFileStream(stream);
+            }
 		}
 
 		/// <summary>

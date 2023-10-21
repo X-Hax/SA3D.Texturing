@@ -85,28 +85,6 @@ namespace SA3D.Texturing
 
 
 		/// <summary>
-		/// Read a color texture from a file.
-		/// </summary>
-		/// <param name="filepath">Path to the file to read.</param>
-		public static ColorTexture ReadColoredFromFile(string filepath)
-		{
-			return ReadColoredFromFile(File.OpenRead(filepath), Path.GetFileNameWithoutExtension(filepath));
-		}
-
-		/// <summary>
-		/// Read a color texture from file data.
-		/// </summary>
-		/// <param name="data">File data to read.</param>
-		/// <param name="filename">Filename that should be used.</param>
-		public static ColorTexture ReadColoredFromFile(byte[] data, string filename)
-		{
-			using(MemoryStream stream = new(data))
-			{
-				return ReadColoredFromFile(stream, filename);
-			}
-		}
-
-		/// <summary>
 		/// Read a color texture from a file data stream.
 		/// </summary>
 		/// <param name="stream">Stream to read the file data from.</param>
@@ -139,6 +117,31 @@ namespace SA3D.Texturing
 			image.CopyPixelDataTo(data);
 
 			return new ColorTexture(image.Width, image.Height, data, filename, 0);
+		}
+
+		/// <summary>
+		/// Read a color texture from a file.
+		/// </summary>
+		/// <param name="filepath">Path to the file to read.</param>
+		public static ColorTexture ReadColoredFromFile(string filepath)
+		{
+            using(FileStream stream = File.OpenRead(filepath))
+            {
+			    return ReadColoredFromFile(stream, Path.GetFileNameWithoutExtension(filepath));
+            }
+		}
+
+		/// <summary>
+		/// Read a color texture from file data.
+		/// </summary>
+		/// <param name="data">File data to read.</param>
+		/// <param name="filename">Filename that should be used.</param>
+		public static ColorTexture ReadColoredFromFile(byte[] data, string filename)
+		{
+			using(MemoryStream stream = new(data))
+			{
+				return ReadColoredFromFile(stream, filename);
+			}
 		}
 
 	}

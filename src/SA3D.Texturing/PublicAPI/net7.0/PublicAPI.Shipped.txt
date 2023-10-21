@@ -66,7 +66,7 @@ SA3D.Texturing.Texture.ProcessedWidth.get -> int
 SA3D.Texturing.Texture.ReplaceData(int width, int height, byte[]! data) -> void
 SA3D.Texturing.Texture.Texture(int width, int height, byte[]! data, string! name, uint globalIndex) -> void
 SA3D.Texturing.Texture.Width.get -> int
-SA3D.Texturing.Texture.WriteColoredToDDSFile(string! file) -> void
+SA3D.Texturing.Texture.WriteColoredToDDSFile(string! filepath) -> void
 SA3D.Texturing.Texture.WriteColoredToDDSFileData() -> byte[]!
 SA3D.Texturing.Texture.WriteColoredToDDSFileStream(System.IO.Stream! stream) -> void
 SA3D.Texturing.Texture.WriteColoredToPNGFile(string! filepath) -> void
@@ -81,9 +81,11 @@ SA3D.Texturing.TexturePalette.TexturePalette(string! name, byte[]! colorData) ->
 SA3D.Texturing.TexturePalette.Width.get -> int
 SA3D.Texturing.TextureSet
 SA3D.Texturing.TextureSet.ExportTexturePack(string! outDirectory, bool useDDS = false) -> void
-SA3D.Texturing.TextureSet.GetIndexContents(string! nameSuffix) -> string!
+SA3D.Texturing.TextureSet.GetContentIndex(string! nameSuffix) -> string!
 SA3D.Texturing.TextureSet.Textures.get -> System.Collections.ObjectModel.ReadOnlyCollection<SA3D.Texturing.Texture!>!
 SA3D.Texturing.TextureSet.TextureSet(SA3D.Texturing.Texture![]! textures) -> void
+SA3D.Texturing.TextureSet.WriteContentIndex(System.IO.TextWriter! writer, string! nameSuffix) -> void
+SA3D.Texturing.TextureSet.WriteContentIndexToFile(string! filepath, string! nameSuffix) -> void
 SA3D.Texturing.TextureUtilities
 static SA3D.Texturing.ColorTexture.ReadColoredFromFile(byte[]! data, string! filename) -> SA3D.Texturing.ColorTexture!
 static SA3D.Texturing.ColorTexture.ReadColoredFromFile(string! filepath) -> SA3D.Texturing.ColorTexture!
