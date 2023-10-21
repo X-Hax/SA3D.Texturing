@@ -56,22 +56,22 @@ namespace SA3D.Texturing
 				{
 					if(useDDS)
 					{
-						indexTex.IndexedToDDSFile(path);
+						indexTex.WriteIndexedToDDSFile(path);
 					}
 					else
 					{
-						indexTex.IndexedToPNGFile(path, false);
+						indexTex.WriteIndexedToPNGFile(path, false);
 					}
 				}
 				else
 				{
 					if(useDDS)
 					{
-						texture.ColoredToDDSFile(path);
+						texture.WriteColoredToDDSFile(path);
 					}
 					else
 					{
-						texture.ColoredToPNGFile(path);
+						texture.WriteColoredToPNGFile(path);
 					}
 				}
 			}

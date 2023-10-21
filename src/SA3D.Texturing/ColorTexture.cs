@@ -70,7 +70,7 @@ namespace SA3D.Texturing
 		}
 
 		/// <inheritdoc/>
-		public override bool IsTransparent()
+		public override bool CheckIsTransparent()
 		{
 			for(int i = 3; i < Data.Length; i += 4)
 			{
@@ -88,9 +88,9 @@ namespace SA3D.Texturing
 		/// Read a color texture from a file.
 		/// </summary>
 		/// <param name="filepath">Path to the file to read.</param>
-		public static ColorTexture ReadFromFileColored(string filepath)
+		public static ColorTexture ReadColoredFromFile(string filepath)
 		{
-			return ReadFromFileColored(File.OpenRead(filepath), Path.GetFileNameWithoutExtension(filepath));
+			return ReadColoredFromFile(File.OpenRead(filepath), Path.GetFileNameWithoutExtension(filepath));
 		}
 
 		/// <summary>
@@ -98,11 +98,11 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="data">File data to read.</param>
 		/// <param name="filename">Filename that should be used.</param>
-		public static ColorTexture ReadFromFileColored(byte[] data, string filename)
+		public static ColorTexture ReadColoredFromFile(byte[] data, string filename)
 		{
 			using(MemoryStream stream = new(data))
 			{
-				return ReadFromFileColored(stream, filename);
+				return ReadColoredFromFile(stream, filename);
 			}
 		}
 
@@ -111,7 +111,7 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="stream">Stream to read the file data from.</param>
 		/// <param name="filename">Filename that should be used.</param>
-		public static ColorTexture ReadFromFileColored(Stream stream, string filename)
+		public static ColorTexture ReadColoredFromFile(Stream stream, string filename)
 		{
 			long dataStart = stream.Position;
 

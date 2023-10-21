@@ -1,12 +1,12 @@
 ﻿#nullable enable
 abstract SA3D.Texturing.Texture.CalculateExpectedDataLength(int width, int height) -> int
+abstract SA3D.Texturing.Texture.CheckIsTransparent() -> bool
 abstract SA3D.Texturing.Texture.GetColorPixels() -> System.ReadOnlySpan<byte>
-abstract SA3D.Texturing.Texture.IsTransparent() -> bool
 const SA3D.Texturing.Texname.TextureName.StructSize = 12 -> int
+override SA3D.Texturing.ColorTexture.CheckIsTransparent() -> bool
 override SA3D.Texturing.ColorTexture.GetColorPixels() -> System.ReadOnlySpan<byte>
-override SA3D.Texturing.ColorTexture.IsTransparent() -> bool
+override SA3D.Texturing.IndexTexture.CheckIsTransparent() -> bool
 override SA3D.Texturing.IndexTexture.GetColorPixels() -> System.ReadOnlySpan<byte>
-override SA3D.Texturing.IndexTexture.IsTransparent() -> bool
 override SA3D.Texturing.Texname.TextureName.ToString() -> string!
 override SA3D.Texturing.Texture.ToString() -> string!
 SA3D.Texturing.ColorTexture
@@ -16,12 +16,6 @@ SA3D.Texturing.ColorTexture.ColorTexture(int width, int height, byte[]! data, st
 SA3D.Texturing.ColorTexture.ColorTexture(int width, int height, byte[]! data, uint globalIndex) -> void
 SA3D.Texturing.ImageSharpExtensions
 SA3D.Texturing.IndexTexture
-SA3D.Texturing.IndexTexture.IndexedToDDSFile(string! filepath) -> void
-SA3D.Texturing.IndexTexture.IndexedToDDSFileData() -> byte[]!
-SA3D.Texturing.IndexTexture.IndexedToDDSFileStream(System.IO.Stream! stream) -> void
-SA3D.Texturing.IndexTexture.IndexedToPNGFile(string! filepath, bool storeInAlpha) -> void
-SA3D.Texturing.IndexTexture.IndexedToPNGFileData(bool storeInAlpha) -> byte[]!
-SA3D.Texturing.IndexTexture.IndexedToPNGFileStream(System.IO.Stream! stream, bool storeInAlpha) -> void
 SA3D.Texturing.IndexTexture.IndexTexture(int width, int height, byte[]! data) -> void
 SA3D.Texturing.IndexTexture.IndexTexture(int width, int height, byte[]! data, string! name) -> void
 SA3D.Texturing.IndexTexture.IndexTexture(int width, int height, byte[]! data, string! name, uint globalIndex) -> void
@@ -32,6 +26,12 @@ SA3D.Texturing.IndexTexture.Palette.get -> SA3D.Texturing.TexturePalette?
 SA3D.Texturing.IndexTexture.Palette.set -> void
 SA3D.Texturing.IndexTexture.PaletteRow.get -> int
 SA3D.Texturing.IndexTexture.PaletteRow.set -> void
+SA3D.Texturing.IndexTexture.WriteIndexedToDDSFile(string! filepath) -> void
+SA3D.Texturing.IndexTexture.WriteIndexedToDDSFileData() -> byte[]!
+SA3D.Texturing.IndexTexture.WriteIndexedToDDSFileStream(System.IO.Stream! stream) -> void
+SA3D.Texturing.IndexTexture.WriteIndexedToPNGFile(string! filepath, bool storeInAlpha) -> void
+SA3D.Texturing.IndexTexture.WriteIndexedToPNGFileData(bool storeInAlpha) -> byte[]!
+SA3D.Texturing.IndexTexture.WriteIndexedToPNGFileStream(System.IO.Stream! stream, bool storeInAlpha) -> void
 SA3D.Texturing.Texname.TextureName
 SA3D.Texturing.Texname.TextureName.Attributes.get -> uint
 SA3D.Texturing.Texname.TextureName.Name.get -> string?
@@ -51,12 +51,6 @@ SA3D.Texturing.Texname.TextureNameList.Write(SA3D.Common.IO.EndianStackWriter! w
 SA3D.Texturing.Texname.TextureNameList.WriteToIniFile(string! filepath) -> void
 SA3D.Texturing.Texname.TextureNameList.WriteToTextFile(string! filePath, string! extension = "pvr") -> void
 SA3D.Texturing.Texture
-SA3D.Texturing.Texture.ColoredToDDSFile(string! file) -> void
-SA3D.Texturing.Texture.ColoredToDDSFileData() -> byte[]!
-SA3D.Texturing.Texture.ColoredToDDSFileStream(System.IO.Stream! stream) -> void
-SA3D.Texturing.Texture.ColoredToPNGFile(string! filepath) -> void
-SA3D.Texturing.Texture.ColoredToPNGFileData() -> byte[]!
-SA3D.Texturing.Texture.ColoredToPNGFileStream(System.IO.Stream! stream) -> void
 SA3D.Texturing.Texture.Data.get -> byte[]!
 SA3D.Texturing.Texture.GlobalIndex.get -> uint
 SA3D.Texturing.Texture.GlobalIndex.set -> void
@@ -72,6 +66,12 @@ SA3D.Texturing.Texture.ProcessedWidth.get -> int
 SA3D.Texturing.Texture.ReplaceData(int width, int height, byte[]! data) -> void
 SA3D.Texturing.Texture.Texture(int width, int height, byte[]! data, string! name, uint globalIndex) -> void
 SA3D.Texturing.Texture.Width.get -> int
+SA3D.Texturing.Texture.WriteColoredToDDSFile(string! file) -> void
+SA3D.Texturing.Texture.WriteColoredToDDSFileData() -> byte[]!
+SA3D.Texturing.Texture.WriteColoredToDDSFileStream(System.IO.Stream! stream) -> void
+SA3D.Texturing.Texture.WriteColoredToPNGFile(string! filepath) -> void
+SA3D.Texturing.Texture.WriteColoredToPNGFileData() -> byte[]!
+SA3D.Texturing.Texture.WriteColoredToPNGFileStream(System.IO.Stream! stream) -> void
 SA3D.Texturing.TexturePalette
 SA3D.Texturing.TexturePalette.ColorData.get -> System.ReadOnlySpan<byte>
 SA3D.Texturing.TexturePalette.Name.get -> string!
@@ -85,24 +85,24 @@ SA3D.Texturing.TextureSet.GetIndexContents(string! nameSuffix) -> string!
 SA3D.Texturing.TextureSet.Textures.get -> System.Collections.ObjectModel.ReadOnlyCollection<SA3D.Texturing.Texture!>!
 SA3D.Texturing.TextureSet.TextureSet(SA3D.Texturing.Texture![]! textures) -> void
 SA3D.Texturing.TextureUtilities
-static SA3D.Texturing.ColorTexture.ReadFromFileColored(byte[]! data, string! filename) -> SA3D.Texturing.ColorTexture!
-static SA3D.Texturing.ColorTexture.ReadFromFileColored(string! filepath) -> SA3D.Texturing.ColorTexture!
-static SA3D.Texturing.ColorTexture.ReadFromFileColored(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.ColorTexture!
+static SA3D.Texturing.ColorTexture.ReadColoredFromFile(byte[]! data, string! filename) -> SA3D.Texturing.ColorTexture!
+static SA3D.Texturing.ColorTexture.ReadColoredFromFile(string! filepath) -> SA3D.Texturing.ColorTexture!
+static SA3D.Texturing.ColorTexture.ReadColoredFromFile(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.ColorTexture!
 static SA3D.Texturing.ImageSharpExtensions.CreatePaletteQuantizer(this SA3D.Texturing.TexturePalette! palette, int width, int offset, bool dither) -> SixLabors.ImageSharp.Processing.Processors.Quantization.PaletteQuantizer!
 static SA3D.Texturing.ImageSharpExtensions.ToImageSharp(this SA3D.Texturing.Texture! texture) -> SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>!
 static SA3D.Texturing.ImageSharpExtensions.ToImageSharp(this SA3D.Texturing.TexturePalette! palette, int? rowWidth = null) -> SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>!
 static SA3D.Texturing.ImageSharpExtensions.ToIndexedImageSharp(this SA3D.Texturing.IndexTexture! texture) -> SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.A8>!
 static SA3D.Texturing.ImageSharpExtensions.ToPalette(this SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>! image) -> SA3D.Texturing.TexturePalette!
 static SA3D.Texturing.ImageSharpExtensions.ToTexture(this SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>! image) -> SA3D.Texturing.ColorTexture!
-static SA3D.Texturing.IndexTexture.IsFileIndex(byte[]! data, out bool index4, out bool storedInAlpha) -> bool
-static SA3D.Texturing.IndexTexture.IsFileIndex(string! filepath, out bool index4, out bool storedInAlpha) -> bool
-static SA3D.Texturing.IndexTexture.IsFileIndex(System.IO.Stream! stream, out bool index4, out bool storedInAlpha) -> bool
-static SA3D.Texturing.IndexTexture.ReadFileIndexed(byte[]! data, string! filename) -> SA3D.Texturing.IndexTexture!
-static SA3D.Texturing.IndexTexture.ReadFileIndexed(string! filepath) -> SA3D.Texturing.IndexTexture!
-static SA3D.Texturing.IndexTexture.ReadFileIndexed(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.IndexTexture!
-static SA3D.Texturing.IndexTexture.TryReadFileIndexed(byte[]! data, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
-static SA3D.Texturing.IndexTexture.TryReadFileIndexed(string! filepath, out SA3D.Texturing.IndexTexture! result) -> bool
-static SA3D.Texturing.IndexTexture.TryReadFileIndexed(System.IO.Stream! stream, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
+static SA3D.Texturing.IndexTexture.CheckCanReadIndexedFromFile(byte[]! data, out bool index4, out bool storedInAlpha) -> bool
+static SA3D.Texturing.IndexTexture.CheckCanReadIndexedFromFile(string! filepath, out bool index4, out bool storedInAlpha) -> bool
+static SA3D.Texturing.IndexTexture.CheckCanReadIndexedFromFile(System.IO.Stream! stream, out bool index4, out bool storedInAlpha) -> bool
+static SA3D.Texturing.IndexTexture.ReadIndexedFromFile(byte[]! data, string! filename) -> SA3D.Texturing.IndexTexture!
+static SA3D.Texturing.IndexTexture.ReadIndexedFromFile(string! filepath) -> SA3D.Texturing.IndexTexture!
+static SA3D.Texturing.IndexTexture.ReadIndexedFromFile(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.IndexTexture!
+static SA3D.Texturing.IndexTexture.TryReadIndexedFromFile(byte[]! data, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
+static SA3D.Texturing.IndexTexture.TryReadIndexedFromFile(string! filepath, out SA3D.Texturing.IndexTexture! result) -> bool
+static SA3D.Texturing.IndexTexture.TryReadIndexedFromFile(System.IO.Stream! stream, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
 static SA3D.Texturing.Texname.TextureName.Read(SA3D.Common.IO.EndianStackReader! reader, uint address) -> SA3D.Texturing.Texname.TextureName!
 static SA3D.Texturing.Texname.TextureNameList.Read(SA3D.Common.IO.EndianStackReader! reader, uint address, SA3D.Common.Lookup.LabelDictionary! labels) -> SA3D.Texturing.Texname.TextureNameList!
 static SA3D.Texturing.Texname.TextureNameList.ReadFromFile(string! filepath) -> SA3D.Texturing.Texname.TextureNameList!

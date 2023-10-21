@@ -126,7 +126,7 @@ namespace SA3D.Texturing
 		/// Checks whether any pixel has an alpha value below 255.
 		/// </summary>
 		/// <returns>Whether any pixel is has an alpha value below 255</returns>
-		public abstract bool IsTransparent();
+		public abstract bool CheckIsTransparent();
 
 
 		/// <summary>
@@ -160,14 +160,14 @@ namespace SA3D.Texturing
 		{
 			long dataStart = stream.Position;
 
-			if(IndexTexture.TryReadFileIndexed(stream, filename, out IndexTexture? result))
+			if(IndexTexture.TryReadIndexedFromFile(stream, filename, out IndexTexture? result))
 			{
 				return result;
 			}
 			else
 			{
 				stream.Seek(dataStart, SeekOrigin.Begin);
-				return ColorTexture.ReadFromFileColored(stream, filename);
+				return ColorTexture.ReadColoredFromFile(stream, filename);
 			}
 		}
 
@@ -176,21 +176,21 @@ namespace SA3D.Texturing
 		/// Write the colored texture to a PNG file.
 		/// </summary>
 		/// <param name="filepath">Path to the file to write to.</param>
-		public void ColoredToPNGFile(string filepath)
+		public void WriteColoredToPNGFile(string filepath)
 		{
-			ColoredToPNGFileStream(File.OpenWrite(filepath));
+			WriteColoredToPNGFileStream(File.OpenWrite(filepath));
 		}
 
 		/// <summary>
 		/// Encode the colored texture as a PNG file.
 		/// </summary>
-		public byte[] ColoredToPNGFileData()
+		public byte[] WriteColoredToPNGFileData()
 		{
 			byte[] result;
 
 			using(MemoryStream stream = new())
 			{
-				ColoredToPNGFileStream(stream);
+				WriteColoredToPNGFileStream(stream);
 				result = stream.ToArray();
 			}
 
@@ -201,12 +201,12 @@ namespace SA3D.Texturing
 		/// Encode the colored texture as a PNG file and write it to a stream.
 		/// </summary>
 		/// <param name="stream">The stream to write to.</param>
-		public void ColoredToPNGFileStream(Stream stream)
+		public void WriteColoredToPNGFileStream(Stream stream)
 		{
 			ReadOnlySpan<byte> colorData = GetColorPixels();
 			PngEncoder encoder = new()
 			{
-				ColorType = IsTransparent() ? PngColorType.RgbWithAlpha : PngColorType.Rgb,
+				ColorType = CheckIsTransparent() ? PngColorType.RgbWithAlpha : PngColorType.Rgb,
 				TransparentColorMode = PngTransparentColorMode.Preserve,
 				ChunkFilter = PngChunkFilter.ExcludeAll
 			};
@@ -218,21 +218,21 @@ namespace SA3D.Texturing
 		/// Write the colored texture to a DDS file.
 		/// </summary>
 		/// <param name="file">Path to the file to write to.</param>
-		public void ColoredToDDSFile(string file)
+		public void WriteColoredToDDSFile(string file)
 		{
-			ColoredToDDSFileStream(File.OpenWrite(file));
+			WriteColoredToDDSFileStream(File.OpenWrite(file));
 		}
 
 		/// <summary>
 		/// Encode the colored texture as a DDS file.
 		/// </summary>
-		public byte[] ColoredToDDSFileData()
+		public byte[] WriteColoredToDDSFileData()
 		{
 			byte[] result;
 
 			using(MemoryStream stream = new())
 			{
-				ColoredToDDSFileStream(stream);
+				WriteColoredToDDSFileStream(stream);
 				result = stream.ToArray();
 			}
 
@@ -243,10 +243,10 @@ namespace SA3D.Texturing
 		/// Encode the colored texture as a DDS file and write it to a stream.
 		/// </summary>
 		/// <param name="stream">The stream to write to.</param>
-		public void ColoredToDDSFileStream(Stream stream)
+		public void WriteColoredToDDSFileStream(Stream stream)
 		{
 			ReadOnlySpan<byte> colorData = GetColorPixels();
-			if(IsTransparent())
+			if(CheckIsTransparent())
 			{
 				new BcEncoder(CompressionFormat.Bc3).EncodeToDds(colorData, Width, Height, PixelFormat.Rgba32).Write(stream);
 			}
