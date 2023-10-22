@@ -11,7 +11,7 @@
 		<Title>SA3D Texturing Library</Title>
 		<Product>SA3D Texturing Library</Product>
 		<Description>Texture data handler</Description>
-		<Version>1.2.0</Version>
+		<Version>1.2.1</Version>
 		<RepositoryUrl>https://github.com/X-Hax/SA3D.Texturing</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/X-Hax/SA3D.Texturing</PackageProjectUrl>
 		<PackageId>SA3D.Texturing</PackageId>
