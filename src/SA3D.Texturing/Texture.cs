@@ -130,15 +130,23 @@ namespace SA3D.Texturing
 
 
 		/// <summary>
-		/// Read a texture from a file.
+		/// Read a texture file from a file data stream.
 		/// </summary>
-		/// <param name="filepath">Path to the file to read.</param>
-		public static Texture ReadFromFile(string filepath)
+		/// <param name="stream">Stream to read the file data from.</param>
+		/// <param name="filename">Filename that should be used.</param>
+		public static Texture ReadTexture(Stream stream, string filename)
 		{
-            using(FileStream stream = File.OpenRead(filepath))
-            {
-			    return ReadFromFile(stream, Path.GetFileNameWithoutExtension(filepath));
-            }
+			long dataStart = stream.Position;
+
+			if(IndexTexture.TryReadIndexed(stream, filename, out IndexTexture? result))
+			{
+				return result;
+			}
+			else
+			{
+				stream.Seek(dataStart, SeekOrigin.Begin);
+				return ColorTexture.ReadColored(stream, filename);
+			}
 		}
 
 		/// <summary>
@@ -146,68 +154,32 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="data">File data to read.</param>
 		/// <param name="filename">Filename that should be used.</param>
-		public static Texture ReadFromFile(byte[] data, string filename)
+		public static Texture ReadTexture(byte[] data, string filename)
 		{
 			using(MemoryStream stream = new(data))
 			{
-				return ReadFromFile(stream, filename);
+				return ReadTexture(stream, filename);
 			}
 		}
 
 		/// <summary>
-		/// Read a texture file from a file data stream.
+		/// Read a texture from a file.
 		/// </summary>
-		/// <param name="stream">Stream to read the file data from.</param>
-		/// <param name="filename">Filename that should be used.</param>
-		public static Texture ReadFromFile(Stream stream, string filename)
+		/// <param name="filepath">Path to the file to read.</param>
+		public static Texture ReadTextureFromFile(string filepath)
 		{
-			long dataStart = stream.Position;
-
-			if(IndexTexture.TryReadIndexedFromFile(stream, filename, out IndexTexture? result))
-			{
-				return result;
-			}
-			else
-			{
-				stream.Seek(dataStart, SeekOrigin.Begin);
-				return ColorTexture.ReadColoredFromFile(stream, filename);
-			}
-		}
-
-
-		/// <summary>
-		/// Write the colored texture to a PNG file.
-		/// </summary>
-		/// <param name="filepath">Path to the file to write to.</param>
-		public void WriteColoredToPNGFile(string filepath)
-		{
-            using(FileStream stream = File.Create(filepath))
+            using(FileStream stream = File.OpenRead(filepath))
             {
-                WriteColoredToPNGFileStream(stream);
+			    return ReadTexture(stream, Path.GetFileNameWithoutExtension(filepath));
             }
 		}
 
-		/// <summary>
-		/// Encode the colored texture as a PNG file.
-		/// </summary>
-		public byte[] WriteColoredToPNGFileData()
-		{
-			byte[] result;
-
-			using(MemoryStream stream = new())
-			{
-				WriteColoredToPNGFileStream(stream);
-				result = stream.ToArray();
-			}
-
-			return result;
-		}
 
 		/// <summary>
 		/// Encode the colored texture as a PNG file and write it to a stream.
 		/// </summary>
 		/// <param name="stream">The stream to write to.</param>
-		public void WriteColoredToPNGFileStream(Stream stream)
+		public void WriteColoredAsPNG(Stream stream)
 		{
 			ReadOnlySpan<byte> colorData = GetColorPixels();
 			PngEncoder encoder = new()
@@ -219,29 +191,16 @@ namespace SA3D.Texturing
 			Image.LoadPixelData<Rgba32>(colorData, Width, Height).SaveAsPng(stream, encoder);
 		}
 
-
 		/// <summary>
-		/// Write the colored texture to a DDS file.
+		/// Encode the colored texture as a PNG file.
 		/// </summary>
-		/// <param name="filepath">Path to the file to write to.</param>
-		public void WriteColoredToDDSFile(string filepath)
-		{
-            using(FileStream stream = File.Create(filepath))
-            {
-			    WriteColoredToDDSFileStream(stream);
-            }
-		}
-
-		/// <summary>
-		/// Encode the colored texture as a DDS file.
-		/// </summary>
-		public byte[] WriteColoredToDDSFileData()
+		public byte[] WriteColoredAsPNGToBytes()
 		{
 			byte[] result;
 
 			using(MemoryStream stream = new())
 			{
-				WriteColoredToDDSFileStream(stream);
+				WriteColoredAsPNG(stream);
 				result = stream.ToArray();
 			}
 
@@ -249,10 +208,23 @@ namespace SA3D.Texturing
 		}
 
 		/// <summary>
+		/// Write the colored texture to a PNG file.
+		/// </summary>
+		/// <param name="filepath">Path to the file to write to.</param>
+		public void WriteColoredAsPNGToFile(string filepath)
+		{
+            using(FileStream stream = File.Create(filepath))
+            {
+                WriteColoredAsPNG(stream);
+            }
+		}
+
+
+		/// <summary>
 		/// Encode the colored texture as a DDS file and write it to a stream.
 		/// </summary>
 		/// <param name="stream">The stream to write to.</param>
-		public void WriteColoredToDDSFileStream(Stream stream)
+		public void WriteColoredAsDDS(Stream stream)
 		{
 			ReadOnlySpan<byte> colorData = GetColorPixels();
 			if(CheckIsTransparent())
@@ -264,6 +236,35 @@ namespace SA3D.Texturing
 				new BcEncoder(CompressionFormat.Bc1).EncodeToDds(colorData, Width, Height, PixelFormat.Rgba32).Write(stream);
 			}
 		}
+
+		/// <summary>
+		/// Encode the colored texture as a DDS file.
+		/// </summary>
+		public byte[] WriteColoredAsDDSToBytes()
+		{
+			byte[] result;
+
+			using(MemoryStream stream = new())
+			{
+				WriteColoredAsDDS(stream);
+				result = stream.ToArray();
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Write the colored texture to a DDS file.
+		/// </summary>
+		/// <param name="filepath">Path to the file to write to.</param>
+		public void WriteColoredAsDDSToFile(string filepath)
+		{
+            using(FileStream stream = File.Create(filepath))
+            {
+			    WriteColoredAsDDS(stream);
+            }
+		}
+
 
 		/// <inheritdoc/>
 		public override string ToString()

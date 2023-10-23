@@ -38,6 +38,20 @@ namespace SA3D.Texturing
 		}
 
 		/// <summary>
+		/// Generates a content index used by texture packs.
+		/// </summary>
+		/// <param name="nameSuffix">Suffix for every texture name.</param>
+		/// <returns>The index contents.</returns>
+		public string WriteContentIndexToText(string nameSuffix)
+		{
+			using(StringWriter writer = new())
+			{
+				WriteContentIndex(writer, nameSuffix);
+				return writer.ToString();
+			}
+		}
+
+		/// <summary>
 		/// Writes a content index used by texture packs to a file.
 		/// </summary>
 		/// <param name="filepath">Path of the file to write to.</param>
@@ -48,20 +62,6 @@ namespace SA3D.Texturing
 			using(StreamWriter writer = File.CreateText(filepath))
 			{
 				WriteContentIndex(writer, nameSuffix);
-			}
-		}
-
-		/// <summary>
-		/// Generates a content index used by texture packs.
-		/// </summary>
-		/// <param name="nameSuffix">Suffix for every texture name.</param>
-		/// <returns>The index contents.</returns>
-		public string GetContentIndex(string nameSuffix)
-		{
-			using(StringWriter writer = new())
-			{
-				WriteContentIndex(writer, nameSuffix);
-				return writer.ToString();
 			}
 		}
 
@@ -83,27 +83,26 @@ namespace SA3D.Texturing
 				{
 					if(useDDS)
 					{
-						indexTex.WriteIndexedToDDSFile(path);
+						indexTex.WriteIndexedAsDDSToFile(path);
 					}
 					else
 					{
-						indexTex.WriteIndexedToPNGFile(path, false);
+						indexTex.WriteIndexedAsPNGToFile(path, false);
 					}
 				}
 				else
 				{
 					if(useDDS)
 					{
-						texture.WriteColoredToDDSFile(path);
+						texture.WriteColoredAsDDSToFile(path);
 					}
 					else
 					{
-						texture.WriteColoredToPNGFile(path);
+						texture.WriteColoredAsPNGToFile(path);
 					}
 				}
 			}
 		}
-
 
 		/// <summary>
 		/// Imports texture from a texture pack useable by sonic adventure modloaders.
@@ -120,7 +119,7 @@ namespace SA3D.Texturing
 				string[] values = item.Split(',');
 				string filename = values[1];
 
-				Texture texture = Texture.ReadFromFile($"{directory}\\{filename}");
+				Texture texture = Texture.ReadTextureFromFile($"{directory}\\{filename}");
 
 				texture.GlobalIndex = uint.Parse(values[0]);
 				if(values.Length >= 3)

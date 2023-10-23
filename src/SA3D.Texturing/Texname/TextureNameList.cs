@@ -21,6 +21,7 @@ namespace SA3D.Texturing.Texname
 		/// </summary>
 		public ILabeledArray<TextureName> TextureNames { get; set; }
 
+
 		/// <summary>
 		/// Creates a new texture name list.
 		/// </summary>
@@ -31,6 +32,7 @@ namespace SA3D.Texturing.Texname
 			Label = label;
 			TextureNames = textureNames;
 		}
+
 
 		/// <summary>
 		/// Reads a texture name list struct from an endian reader.
@@ -65,6 +67,43 @@ namespace SA3D.Texturing.Texname
 
 			return new(name, new LabeledArray<TextureName>(textureNameArrayLabel, textureNames));
 		}
+
+		/// <summary>
+		/// Reads a texture name list from from an Ini or Satex file.
+		/// </summary>
+		/// <param name="filepath">The path to the file.</param>
+		/// <returns>The read texture name list.</returns>
+		/// <exception cref="FormatException"></exception>
+		public static TextureNameList ReadFromTextFile(string filepath)
+		{
+			string[] lines = File.ReadAllLines(filepath);
+
+			if(lines.Length > 0 && lines[0].Contains('='))
+			{
+				IniTexturenameList ini = IniSerializer.DeserializeFromFile<IniTexturenameList>(filepath)
+										?? throw new FormatException("File not correctly formated as an Ini");
+
+				TextureName[] textureNames = new TextureName[ini.NumTextures];
+				for(int i = 0; i < textureNames.Length; i++)
+				{
+					textureNames[i] = new(ini.TextureNames[i], 0, 0);
+				}
+
+				return new(ini.Name, new LabeledArray<TextureName>(ini.TexnameArrayName, textureNames));
+			}
+			else
+			{
+				TextureName[] textureNames = new TextureName[lines.Length];
+
+				for(int i = 0; i < lines.Length; i++)
+				{
+					textureNames[i] = new TextureName(Path.GetFileNameWithoutExtension(lines[i]), 0, 0);
+				}
+
+				return new TextureNameList(string.Empty, new LabeledArray<TextureName>(textureNames));
+			}
+		}
+
 
 		/// <summary>
 		/// Writes the texture name list as a struct to an endian writer.
@@ -112,47 +151,11 @@ namespace SA3D.Texturing.Texname
 		}
 
 		/// <summary>
-		/// Reads a texture name list from from an Ini or Satex file.
-		/// </summary>
-		/// <param name="filepath">The path to the file.</param>
-		/// <returns>The read texture name list.</returns>
-		/// <exception cref="FormatException"></exception>
-		public static TextureNameList ReadFromFile(string filepath)
-		{
-			string[] lines = File.ReadAllLines(filepath);
-
-			if(lines.Length > 0 && lines[0].Contains('='))
-			{
-				IniTexturenameList ini = IniSerializer.DeserializeFromFile<IniTexturenameList>(filepath)
-										?? throw new FormatException("File not correctly formated as an Ini");
-
-				TextureName[] textureNames = new TextureName[ini.NumTextures];
-				for(int i = 0; i < textureNames.Length; i++)
-				{
-					textureNames[i] = new(ini.TextureNames[i], 0, 0);
-				}
-
-				return new(ini.Name, new LabeledArray<TextureName>(ini.TexnameArrayName, textureNames));
-			}
-			else
-			{
-				TextureName[] textureNames = new TextureName[lines.Length];
-
-				for(int i = 0; i < lines.Length; i++)
-				{
-					textureNames[i] = new TextureName(Path.GetFileNameWithoutExtension(lines[i]), 0, 0);
-				}
-
-				return new TextureNameList(string.Empty, new LabeledArray<TextureName>(textureNames));
-			}
-		}
-
-		/// <summary>
 		/// Saves the texture list as a plain text document.
 		/// </summary>
 		/// <param name="filePath">The path to write the file to.</param>
 		/// <param name="extension">The file extension to add to every texture name. without dot.</param>
-		public void WriteToTextFile(string filePath, string extension = "pvr")
+		public void WriteAsListToTextFile(string filePath, string extension = "pvr")
 		{
 			string lines = string.Empty;
 			foreach(TextureName texName in TextureNames)
@@ -167,7 +170,7 @@ namespace SA3D.Texturing.Texname
 		/// Writes the texture name list to an Ini/Satex file.
 		/// </summary>
 		/// <param name="filepath">The path to write the file to.</param>
-		public void WriteToIniFile(string filepath)
+		public void WriteAsIniToTextFile(string filepath)
 		{
 			string[] textureNames = TextureNames.Select(x => x.Name ?? "NULL").ToArray();
 			IniTexturenameList ini = new(Label, TextureNames.Label, (uint)textureNames.Length, textureNames);
@@ -180,7 +183,7 @@ namespace SA3D.Texturing.Texname
 		/// </summary>
 		/// <param name="writer">the text writer to write it to</param>
 		/// <param name="labels">Used labels</param>
-		public void ToStruct(TextWriter writer, List<string>? labels = null)
+		public void WriteAsStruct(TextWriter writer, List<string>? labels = null)
 		{
 			labels ??= new();
 

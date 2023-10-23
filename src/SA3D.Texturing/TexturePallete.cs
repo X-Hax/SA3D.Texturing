@@ -85,6 +85,7 @@ namespace SA3D.Texturing
 		/// <param name="colorData">Color pixels</param>
 		public TexturePalette(byte[] colorData) : this(string.Empty, colorData) { }
 
+
 		/// <summary>
 		/// Returns either <see cref="Index4Palette"/> or <see cref="Index8Palette"/> based on <paramref name="index4"/>.
 		/// </summary>
