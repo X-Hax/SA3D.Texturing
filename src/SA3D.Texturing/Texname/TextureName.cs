@@ -69,12 +69,12 @@ namespace SA3D.Texturing.Texname
 			uint nameAddress = 0;
 			if(Name != null)
 			{
-				if(!labels.TryGetAddress(Name, out uint? tmpNameAddress))
+				if(!labels.TryGetAddress(Name, out uint tmpNameAddress))
 				{
 					throw new InvalidOperationException("Name has not been written yet!");
 				}
 
-				nameAddress = tmpNameAddress!.Value;
+				nameAddress = tmpNameAddress;
 			}
 
 			writer.WriteUInt(nameAddress);
