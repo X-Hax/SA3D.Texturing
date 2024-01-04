@@ -74,11 +74,12 @@ namespace SA3D.Texturing
 		public void ExportTexturePack(string outDirectory, bool useDDS = false)
 		{
 			string extension = useDDS ? ".dds" : ".png";
-			WriteContentIndexToFile(outDirectory + "\\index.txt", extension);
+			string indexPath = Path.Join(outDirectory, "index.txt");
+			WriteContentIndexToFile(indexPath, extension);
 
 			foreach(Texture texture in Textures)
 			{
-				string path = $"{outDirectory}\\{texture.Name}{extension}";
+				string path = Path.Join(outDirectory, texture.Name + extension);
 				if(texture is IndexTexture indexTex)
 				{
 					if(useDDS)
@@ -113,13 +114,16 @@ namespace SA3D.Texturing
 		{
 			List<Texture> textures = new();
 
-			string[] index = File.ReadAllLines($"{directory}\\index.txt");
+			string indexPath = Path.Join(directory, "index.txt");
+			string[] index = File.ReadAllLines(indexPath);
+
 			foreach(string item in index)
 			{
 				string[] values = item.Split(',');
 				string filename = values[1];
 
-				Texture texture = Texture.ReadTextureFromFile($"{directory}\\{filename}");
+				string texturePath = Path.Join(directory, filename);
+				Texture texture = Texture.ReadTextureFromFile(texturePath);
 
 				texture.GlobalIndex = uint.Parse(values[0]);
 				if(values.Length >= 3)
