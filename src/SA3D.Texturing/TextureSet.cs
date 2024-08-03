@@ -112,7 +112,7 @@ namespace SA3D.Texturing
 		/// <returns>The imported texture set.</returns>
 		public static TextureSet ImportTexturePack(string directory)
 		{
-			List<Texture> textures = new();
+			List<Texture> textures = [];
 
 			string indexPath = Path.Join(directory, "index.txt");
 			string[] index = File.ReadAllLines(indexPath);

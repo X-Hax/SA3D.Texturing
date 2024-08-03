@@ -185,7 +185,7 @@ namespace SA3D.Texturing.Texname
 		/// <param name="labels">Used labels</param>
 		public void WriteAsStruct(TextWriter writer, List<string>? labels = null)
 		{
-			labels ??= new();
+			labels ??= [];
 
 			if(labels.Contains(TextureNames.Label))
 			{
