@@ -1,13 +1,12 @@
-﻿using SA3D.Common.IO;
-using SA3D.Common.Lookup;
-using System;
+﻿using Amicitia.IO.Binary;
+using SA3D.Common.IO;
 
 namespace SA3D.Texturing.Texname
 {
 	/// <summary>
 	/// Stores a texture name and its attributes
 	/// </summary>
-	public class TextureName
+	public class TextureName : IBinarySerializable
 	{
 		/// <summary>
 		/// Size of the struct in bytes.
@@ -29,6 +28,7 @@ namespace SA3D.Texturing.Texname
 		/// </summary>
 		public uint TextureAddress { get; set; }
 
+
 		/// <summary>
 		/// Creates a new texture name.
 		/// </summary>
@@ -43,43 +43,31 @@ namespace SA3D.Texturing.Texname
 		}
 
 		/// <summary>
-		/// Reads a texture from a reader.
+		/// Creates a new, empty texture name
 		/// </summary>
-		/// <param name="reader">Reader to read the data from.</param>
-		/// <param name="address">The address at which to read the texture name struct.</param>
-		/// <returns>The read texture name.</returns>
-		public static TextureName Read(EndianStackReader reader, uint address)
-		{
-			uint nameAddr = reader.ReadPointer(address);
-			string? name = nameAddr == 0 ? null : reader.ReadNullterminatedString(nameAddr);
-			uint attributes = reader.ReadUInt(address + 4);
-			uint textureAddr = reader.ReadUInt(address + 8);
+		public TextureName() : this(null, 0, 0) { }
 
-			return new(name, attributes, textureAddr);
+
+		/// <summary>
+		/// Reads a texture name from a <see cref="BinaryObjectReader"/>
+		/// </summary>
+		/// <param name="reader">The reader to read from</param>
+		public void Read(BinaryObjectReader reader)
+		{
+			Name = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
+			Attributes = reader.ReadUInt32();
+			TextureAddress = reader.ReadUInt32();
 		}
 
 		/// <summary>
-		/// Writes the texture name struct to a writer and obtains the name string from labels.
+		/// Writes a texture name to a <see cref="BinaryObjectWriter"/>
 		/// </summary>
-		/// <param name="writer">Writer to write the struct to.</param>
-		/// <param name="labels">Label dictionary to obtain the string address from.</param>
-		/// <exception cref="InvalidOperationException"></exception>
-		public void Write(EndianStackWriter writer, LabelDictionary labels)
+		/// <param name="writer">The writer to write to</param>
+		public void Write(BinaryObjectWriter writer)
 		{
-			uint nameAddress = 0;
-			if(Name != null)
-			{
-				if(!labels.TryGetAddress(Name, out uint tmpNameAddress))
-				{
-					throw new InvalidOperationException("Name has not been written yet!");
-				}
-
-				nameAddress = tmpNameAddress;
-			}
-
-			writer.WriteUInt(nameAddress);
-			writer.WriteUInt(Attributes);
-			writer.WriteUInt(TextureAddress);
+			writer.WriteStringOffset(StringBinaryFormat.NullTerminated, Name, alignment: 4);
+			writer.WriteUInt32(Attributes);
+			writer.WriteUInt32(TextureAddress);
 		}
 
 		/// <inheritdoc/>

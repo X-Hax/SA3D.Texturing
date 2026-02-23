@@ -18,6 +18,6 @@ namespace SA3D.Texturing.Texname
 			NumTextures = numTextures;
 			TextureNames = textureNames;
 		}
-		public IniTexturenameList() : this(string.Empty, string.Empty, 0, Array.Empty<string>()) { }
+		public IniTexturenameList() : this(string.Empty, string.Empty, 0, []) { }
 	}
 }

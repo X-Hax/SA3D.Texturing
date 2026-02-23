@@ -138,13 +138,11 @@ namespace SA3D.Texturing
 		/// <param name="filepath">Path to the file to read.</param>
 		public static ColorTexture ReadColoredFromFile(string filepath)
 		{
-            using(FileStream stream = File.OpenRead(filepath))
-            {
-			    return ReadColored(stream, Path.GetFileNameWithoutExtension(filepath));
-            }
+			using(FileStream stream = File.OpenRead(filepath))
+			{
+				return ReadColored(stream, Path.GetFileNameWithoutExtension(filepath));
+			}
 		}
-
-
 
 	}
 }

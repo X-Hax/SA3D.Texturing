@@ -1,4 +1,6 @@
-﻿using SA3D.Common.Ini;
+﻿using Amicitia.IO.Binary;
+using SA3D.Common;
+using SA3D.Common.Ini;
 using SA3D.Common.IO;
 using SA3D.Common.Lookup;
 using System;
@@ -11,8 +13,11 @@ namespace SA3D.Texturing.Texname
 	/// <summary>
 	/// Stores a texture name list.
 	/// </summary>
-	public class TextureNameList : ILabel
+	public class TextureNameList : ILabel, IBinarySerializable<LabelDictionary>
 	{
+		private const string _labelPrefix = "texlist_";
+		private const string _texturesLabelPrefix = "textures_";
+
 		/// <inheritdoc/>
 		public string Label { get; set; }
 
@@ -21,6 +26,17 @@ namespace SA3D.Texturing.Texname
 		/// </summary>
 		public ILabeledArray<TextureName> TextureNames { get; set; }
 
+		/// <summary>
+		/// Creates a new, empty texture list
+		/// </summary>
+		public TextureNameList() : this(
+			_labelPrefix.GenerateIdentifier(),
+			new LabeledArray<TextureName>(
+				_texturesLabelPrefix.GenerateIdentifier(),
+				[]
+			)
+		)
+		{ }
 
 		/// <summary>
 		/// Creates a new texture name list.
@@ -37,35 +53,22 @@ namespace SA3D.Texturing.Texname
 		/// <summary>
 		/// Reads a texture name list struct from an endian reader.
 		/// </summary>
-		/// <param name="reader">The reader to read the struct from.</param>
-		/// <param name="address">The address at which to read the struct.</param>
-		/// <param name="labels">Labels to use.</param>
-		/// <returns>The read texture name list.</returns>
-		public static TextureNameList Read(EndianStackReader reader, uint address, LabelDictionary labels)
+		/// <param name="reader">The reader to read from</param>
+		/// <param name="labels">The labels to use</param>
+		public void Read(BinaryObjectReader reader, LabelDictionary? labels)
 		{
-			if(!labels.TryGetValue(address, out string? name))
+			labels.NullReferenceCheck();
+			Label = labels.GetSafe((uint)reader.Position, _labelPrefix);
+
+			long texturesOffset = reader.ReadOffsetValue();
+			int texturesCount = reader.ReadInt32();
+
+			reader.ReadAtOffset(texturesOffset, () =>
 			{
-				name = "texlist_" + address.ToString("X8");
-			}
-
-			uint texnameArrayAddr = reader.ReadPointer(address);
-			if(!labels.TryGetValue(texnameArrayAddr, out string? textureNameArrayLabel))
-			{
-				textureNameArrayLabel = "textures_" + texnameArrayAddr.ToString("X8");
-			}
-
-			TextureName[] textureNames = new TextureName[reader.ReadUInt(address + 4)];
-
-			if(texnameArrayAddr != 0)
-			{
-				for(uint i = 0; i < textureNames.Length; i++)
-				{
-					textureNames[i] = TextureName.Read(reader, texnameArrayAddr);
-					texnameArrayAddr += TextureName.StructSize;
-				}
-			}
-
-			return new(name, new LabeledArray<TextureName>(textureNameArrayLabel, textureNames));
+				string texturesLabel = labels.GetSafe((uint)reader.Position, _texturesLabelPrefix);
+				TextureName[] textureNames = reader.ReadObjectArray<TextureName>(texturesCount);
+				TextureNames = new LabeledArray<TextureName>(texturesLabel, textureNames);
+			});
 		}
 
 		/// <summary>
@@ -106,48 +109,21 @@ namespace SA3D.Texturing.Texname
 
 
 		/// <summary>
-		/// Writes the texture name list as a struct to an endian writer.
+		/// Writes the texture name list to a <see cref="BinaryObjectWriter"/>
 		/// </summary>
-		/// <param name="writer">The writer to write the struct to.</param>
-		/// <param name="labels">The dictionary in which to store the struct labels.</param>
-		/// <returns>The address at which the structure was written.</returns>
-		public uint Write(EndianStackWriter writer, LabelDictionary labels)
+		/// <param name="writer">The writer to write to</param>
+		/// <param name="labels">The dictionary in which to store the struct labels</param>
+		public void Write(BinaryObjectWriter writer, LabelDictionary? labels)
 		{
-			uint start = writer.Position;
-			writer.WriteEmpty((uint)(8 + (TextureNames.Length * TextureName.StructSize)));
+			labels.NullReferenceCheck();
 
-			// write name strings
-			foreach(TextureName texName in TextureNames)
+			labels.AddSafe(writer.Position, Label);
+			writer.WriteOffset(TextureNames, () =>
 			{
-				if(texName.Name == null)
-				{
-					continue;
-				}
-
-				if(!labels.TryGetAddress(texName.Name, out _))
-				{
-					labels.Add(writer.PointerPosition, texName.Name);
-					writer.WriteStringNullterminated(texName.Name);
-					writer.Align(4);
-				}
-			}
-
-			writer.Stream.Seek(start, SeekOrigin.Begin);
-			uint textureNamesAddress = writer.PointerPosition;
-
-			labels.AddSafe(textureNamesAddress, TextureNames.Label);
-			foreach(TextureName texName in TextureNames)
-			{
-				texName.Write(writer, labels);
-			}
-
-			uint address = writer.PointerPosition;
-			labels.AddSafe(address, Label);
-			writer.WriteUInt(textureNamesAddress);
-			writer.WriteInt(TextureNames.Length);
-
-			writer.Stream.Seek(0, SeekOrigin.End);
-			return address;
+				labels.AddSafe(writer.Position, TextureNames.Label);
+				writer.WriteObjectArray(TextureNames);
+			});
+			writer.WriteInt32(TextureNames.Length);
 		}
 
 		/// <summary>

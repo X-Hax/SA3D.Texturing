@@ -39,14 +39,12 @@ SA3D.Texturing.Texname.TextureName.Name.set -> void
 SA3D.Texturing.Texname.TextureName.TextureAddress.get -> uint
 SA3D.Texturing.Texname.TextureName.TextureAddress.set -> void
 SA3D.Texturing.Texname.TextureName.TextureName(string? name, uint attributes, uint textureAddress) -> void
-SA3D.Texturing.Texname.TextureName.Write(SA3D.Common.IO.EndianStackWriter! writer, SA3D.Common.Lookup.LabelDictionary! labels) -> void
 SA3D.Texturing.Texname.TextureNameList
 SA3D.Texturing.Texname.TextureNameList.Label.get -> string!
 SA3D.Texturing.Texname.TextureNameList.Label.set -> void
 SA3D.Texturing.Texname.TextureNameList.TextureNameList(string! label, SA3D.Common.Lookup.ILabeledArray<SA3D.Texturing.Texname.TextureName!>! textureNames) -> void
 SA3D.Texturing.Texname.TextureNameList.TextureNames.get -> SA3D.Common.Lookup.ILabeledArray<SA3D.Texturing.Texname.TextureName!>!
 SA3D.Texturing.Texname.TextureNameList.TextureNames.set -> void
-SA3D.Texturing.Texname.TextureNameList.Write(SA3D.Common.IO.EndianStackWriter! writer, SA3D.Common.Lookup.LabelDictionary! labels) -> uint
 SA3D.Texturing.Texname.TextureNameList.WriteAsIniToTextFile(string! filepath) -> void
 SA3D.Texturing.Texname.TextureNameList.WriteAsListToTextFile(string! filePath, string! extension = "pvr") -> void
 SA3D.Texturing.Texname.TextureNameList.WriteAsStruct(System.IO.TextWriter! writer, System.Collections.Generic.List<string!>? labels = null) -> void
@@ -105,8 +103,6 @@ static SA3D.Texturing.IndexTexture.ReadIndexedFromFile(string! filepath) -> SA3D
 static SA3D.Texturing.IndexTexture.TryReadIndexed(byte[]! data, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
 static SA3D.Texturing.IndexTexture.TryReadIndexed(System.IO.Stream! stream, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
 static SA3D.Texturing.IndexTexture.TryReadIndexedFromFile(string! filepath, out SA3D.Texturing.IndexTexture! result) -> bool
-static SA3D.Texturing.Texname.TextureName.Read(SA3D.Common.IO.EndianStackReader! reader, uint address) -> SA3D.Texturing.Texname.TextureName!
-static SA3D.Texturing.Texname.TextureNameList.Read(SA3D.Common.IO.EndianStackReader! reader, uint address, SA3D.Common.Lookup.LabelDictionary! labels) -> SA3D.Texturing.Texname.TextureNameList!
 static SA3D.Texturing.Texname.TextureNameList.ReadFromTextFile(string! filepath) -> SA3D.Texturing.Texname.TextureNameList!
 static SA3D.Texturing.Texture.ReadTexture(byte[]! data, string! filename) -> SA3D.Texturing.Texture!
 static SA3D.Texturing.Texture.ReadTexture(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.Texture!
