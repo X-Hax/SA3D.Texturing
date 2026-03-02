@@ -13,13 +13,15 @@ namespace SA3D.Texturing.Texname
 	/// <summary>
 	/// Stores a texture name list.
 	/// </summary>
-	public class TextureNameList : ILabel, IBinarySerializable<LabelDictionary>
+	public class TextureNameList : ILabel, IBinarySerializable<BaseLUT>
 	{
-		private const string _labelPrefix = "texlist_";
 		private const string _texturesLabelPrefix = "textures_";
 
 		/// <inheritdoc/>
 		public string Label { get; set; }
+
+		/// <inheritdoc/>
+		public string LabelPrefix => "texlist_";
 
 		/// <summary>
 		/// Texture names.
@@ -50,25 +52,16 @@ namespace SA3D.Texturing.Texname
 		}
 
 
-		/// <summary>
-		/// Reads a texture name list struct from an endian reader.
-		/// </summary>
-		/// <param name="reader">The reader to read from</param>
-		/// <param name="labels">The labels to use</param>
-		public void Read(BinaryObjectReader reader, LabelDictionary? labels)
+		/// <inheritdoc/>
+		public void Read(BinaryObjectReader reader, BaseLUT? lut)
 		{
-			labels.NullReferenceCheck();
-			Label = labels.GetSafe((uint)reader.Position, _labelPrefix);
+			lut.NullReferenceCheck();
 
 			long texturesOffset = reader.ReadOffsetValue();
 			int texturesCount = reader.ReadInt32();
 
-			reader.ReadAtOffset(texturesOffset, () =>
-			{
-				string texturesLabel = labels.GetSafe((uint)reader.Position, _texturesLabelPrefix);
-				TextureName[] textureNames = reader.ReadObjectArray<TextureName>(texturesCount);
-				TextureNames = new LabeledArray<TextureName>(texturesLabel, textureNames);
-			});
+			TextureNames = reader.ReadLabeledObjectArrayAtOffset<TextureName>(texturesOffset, texturesCount, _texturesLabelPrefix, lut)
+				?? throw new NullReferenceException($"Texture list has no texture names array (0x{reader.Position})!");
 		}
 
 		/// <summary>
@@ -108,21 +101,11 @@ namespace SA3D.Texturing.Texname
 		}
 
 
-		/// <summary>
-		/// Writes the texture name list to a <see cref="BinaryObjectWriter"/>
-		/// </summary>
-		/// <param name="writer">The writer to write to</param>
-		/// <param name="labels">The dictionary in which to store the struct labels</param>
-		public void Write(BinaryObjectWriter writer, LabelDictionary? labels)
+		/// <inheritdoc/>
+		public void Write(BinaryObjectWriter writer, BaseLUT? lut)
 		{
-			labels.NullReferenceCheck();
-
-			labels.AddSafe(writer.Position, Label);
-			writer.WriteOffset(TextureNames, () =>
-			{
-				labels.AddSafe(writer.Position, TextureNames.Label);
-				writer.WriteObjectArray(TextureNames);
-			});
+			lut.NullReferenceCheck();
+			writer.WriteObjectArrayOffset(TextureNames, lut);
 			writer.WriteInt32(TextureNames.Length);
 		}
 
