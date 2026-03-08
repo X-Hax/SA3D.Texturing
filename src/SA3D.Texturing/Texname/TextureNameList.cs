@@ -15,18 +15,19 @@ namespace SA3D.Texturing.Texname
 	/// </summary>
 	public class TextureNameList : ILabel, IBinarySerializable<BaseLUT>
 	{
+		private const string _labelPrefix = "texlist_";
 		private const string _texturesLabelPrefix = "textures_";
 
 		/// <inheritdoc/>
 		public string Label { get; set; }
 
 		/// <inheritdoc/>
-		public string LabelPrefix => "texlist_";
+		public string LabelPrefix => _labelPrefix;
 
 		/// <summary>
 		/// Texture names.
 		/// </summary>
-		public ILabeledArray<TextureName> TextureNames { get; set; }
+		public LabeledArray<TextureName> TextureNames { get; set; }
 
 		/// <summary>
 		/// Creates a new, empty texture list
@@ -45,7 +46,7 @@ namespace SA3D.Texturing.Texname
 		/// </summary>
 		/// <param name="label">Texture list label.</param>
 		/// <param name="textureNames">Texture names.</param>
-		public TextureNameList(string label, ILabeledArray<TextureName> textureNames)
+		public TextureNameList(string label, LabeledArray<TextureName> textureNames)
 		{
 			Label = label;
 			TextureNames = textureNames;

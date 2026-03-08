@@ -42,8 +42,6 @@ SA3D.Texturing.Texname.TextureName.TextureName(string? name, uint attributes, ui
 SA3D.Texturing.Texname.TextureNameList
 SA3D.Texturing.Texname.TextureNameList.Label.get -> string!
 SA3D.Texturing.Texname.TextureNameList.Label.set -> void
-SA3D.Texturing.Texname.TextureNameList.TextureNameList(string! label, SA3D.Common.Lookup.ILabeledArray<SA3D.Texturing.Texname.TextureName!>! textureNames) -> void
-SA3D.Texturing.Texname.TextureNameList.TextureNames.get -> SA3D.Common.Lookup.ILabeledArray<SA3D.Texturing.Texname.TextureName!>!
 SA3D.Texturing.Texname.TextureNameList.TextureNames.set -> void
 SA3D.Texturing.Texname.TextureNameList.WriteAsIniToTextFile(string! filepath) -> void
 SA3D.Texturing.Texname.TextureNameList.WriteAsListToTextFile(string! filePath, string! extension = "pvr") -> void
