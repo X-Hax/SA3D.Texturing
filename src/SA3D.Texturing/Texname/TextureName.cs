@@ -1,13 +1,77 @@
 ﻿using Amicitia.IO.Binary;
+using J113D.Json;
+using SA3D.Common.Converters;
 using SA3D.Common.IO;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SA3D.Texturing.Texname
 {
 	/// <summary>
 	/// Stores a texture name and its attributes
 	/// </summary>
+	[JsonConverter(typeof(JsonConverter))]
 	public class TextureName : IBinarySerializable
 	{
+		private class JsonConverter : SimpleJsonObjectConverter<TextureName>
+		{
+			private const string _name = nameof(Name);
+			private const string _attributes = nameof(Attributes);
+			private const string _textureAddress = nameof(TextureAddress);
+
+
+			/// <inheritdoc/>
+			public override ReadOnlyDictionary<string, PropertyDefinition> PropertyDefinitions { get; } = new(new Dictionary<string, PropertyDefinition>()
+			{
+				{ _name, new(PropertyTokenType.String, null) },
+				{ _attributes, new(PropertyTokenType.String, 0u) },
+				{ _textureAddress, new(PropertyTokenType.String, 0u) },
+			});
+
+			/// <inheritdoc/>
+			protected override object? ReadValue(ref Utf8JsonReader reader, string propertyName, ReadOnlyDictionary<string, object?> values, JsonSerializerOptions options)
+			{
+				switch(propertyName)
+				{
+					case _name:
+						return reader.GetString();
+					case _attributes:
+					case _textureAddress:
+						return UInt32HexConverter.ConvertFrom(reader.GetString()!, propertyName);
+					default:
+						throw new InvalidPropertyException();
+				}
+			}
+
+			/// <inheritdoc/>
+			protected override TextureName Create(ReadOnlyDictionary<string, object?> values)
+			{
+				string? name = (string?)values[_name];
+				uint attributes = (uint)values[_attributes]!;
+				uint textureAddress = (uint)values[_textureAddress]!;
+
+				return new(name, attributes, textureAddress);
+			}
+
+			/// <inheritdoc/>
+			protected override void WriteValues(Utf8JsonWriter writer, TextureName value, JsonSerializerOptions options)
+			{
+				writer.WriteString(_name, value.Name);
+
+				if(value.Attributes != 0)
+				{
+					writer.WriteString(_attributes, UInt32HexConverter.ConvertTo(value.Attributes));
+				}
+
+				if(value.TextureAddress != 0)
+				{
+					writer.WriteString(_textureAddress, UInt32HexConverter.ConvertTo(value.TextureAddress));
+				}
+			}
+		}
+
 		/// <summary>
 		/// Size of the struct in bytes.
 		/// </summary>

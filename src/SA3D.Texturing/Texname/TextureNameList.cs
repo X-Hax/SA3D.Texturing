@@ -1,20 +1,76 @@
 ﻿using Amicitia.IO.Binary;
+using J113D.Json;
 using SA3D.Common;
 using SA3D.Common.Ini;
 using SA3D.Common.IO;
 using SA3D.Common.Lookup;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SA3D.Texturing.Texname
 {
 	/// <summary>
 	/// Stores a texture name list.
 	/// </summary>
+	[JsonConverter(typeof(JsonConverter))]
 	public class TextureNameList : ILabel, IBinarySerializable<BaseLUT>
 	{
+		private class JsonConverter : SimpleJsonObjectConverter<TextureNameList>
+		{
+			private const string _label = nameof(Label);
+			private const string _textureNames = nameof(TextureNames);
+
+
+			/// <inheritdoc/>
+			public override ReadOnlyDictionary<string, PropertyDefinition> PropertyDefinitions { get; } = new(new Dictionary<string, PropertyDefinition>()
+			{
+				{ _label, new(PropertyTokenType.String, string.Empty) },
+				{ _textureNames, new(PropertyTokenType.Object | PropertyTokenType.Array, null) },
+			});
+
+			/// <inheritdoc/>
+			protected override object? ReadValue(ref Utf8JsonReader reader, string propertyName, ReadOnlyDictionary<string, object?> values, JsonSerializerOptions options)
+			{
+				switch(propertyName)
+				{
+					case _label:
+						return reader.GetString();
+					case _textureNames:
+						return JsonSerializer.Deserialize<LabeledArray<TextureName>>(ref reader, options);
+					default:
+						throw new InvalidPropertyException();
+				}
+			}
+
+			/// <inheritdoc/>
+			protected override TextureNameList Create(ReadOnlyDictionary<string, object?> values)
+			{
+				string label = (string)values[_label]!;
+				LabeledArray<TextureName> textureNames = new(0);
+
+				if(values[_textureNames] is LabeledArray<TextureName> readTextureNames)
+				{
+					textureNames = readTextureNames;
+				}
+
+				return new(label, textureNames);
+			}
+
+			/// <inheritdoc/>
+			protected override void WriteValues(Utf8JsonWriter writer, TextureNameList value, JsonSerializerOptions options)
+			{
+				writer.WriteString(_label, value.Label);
+
+				writer.WritePropertyName(_textureNames);
+				JsonSerializer.Serialize(writer, value.TextureNames, options);
+			}
+		}
+
 		private const string _labelPrefix = "texlist_";
 		private const string _texturesLabelPrefix = "textures_";
 
