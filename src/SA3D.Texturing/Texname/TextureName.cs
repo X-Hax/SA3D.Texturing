@@ -1,5 +1,6 @@
 ﻿using Amicitia.IO.Binary;
 using J113D.Json;
+using SA3D.Common.Ascii;
 using SA3D.Common.Converters;
 using SA3D.Common.IO;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace SA3D.Texturing.Texname
 	/// Stores a texture name and its attributes
 	/// </summary>
 	[JsonConverter(typeof(JsonConverter))]
-	public class TextureName : IBinarySerializable
+	public class TextureName : IBinarySerializable, IAsciiSerializable
 	{
 		private class JsonConverter : SimpleJsonObjectConverter<TextureName>
 		{
@@ -112,10 +113,7 @@ namespace SA3D.Texturing.Texname
 		public TextureName() : this(null, 0, 0) { }
 
 
-		/// <summary>
-		/// Reads a texture name from a <see cref="BinaryObjectReader"/>
-		/// </summary>
-		/// <param name="reader">The reader to read from</param>
+		/// <inheritdoc/>
 		public void Read(BinaryObjectReader reader)
 		{
 			Name = reader.ReadStringOffset(StringBinaryFormat.NullTerminated);
@@ -123,15 +121,18 @@ namespace SA3D.Texturing.Texname
 			TextureAddress = reader.ReadUInt32();
 		}
 
-		/// <summary>
-		/// Writes a texture name to a <see cref="BinaryObjectWriter"/>
-		/// </summary>
-		/// <param name="writer">The writer to write to</param>
+		/// <inheritdoc/>
 		public void Write(BinaryObjectWriter writer)
 		{
 			writer.WriteStringOffset(StringBinaryFormat.NullTerminated, Name, alignment: 4);
 			writer.WriteUInt32(Attributes);
 			writer.WriteUInt32(TextureAddress);
+		}
+
+		/// <inheritdoc/>
+		public void Write(AsciiWriter writer)
+		{
+			writer.WriteLine($"\tTEXN( \"{Name}\" ),");
 		}
 
 		/// <inheritdoc/>

@@ -1,9 +1,11 @@
 ﻿SA3D.Texturing.Texname.TextureName.Read(Amicitia.IO.Binary.BinaryObjectReader! reader) -> void
 SA3D.Texturing.Texname.TextureName.TextureName() -> void
 SA3D.Texturing.Texname.TextureName.Write(Amicitia.IO.Binary.BinaryObjectWriter! writer) -> void
+SA3D.Texturing.Texname.TextureName.Write(SA3D.Common.Ascii.AsciiWriter! writer) -> void
 SA3D.Texturing.Texname.TextureNameList.LabelPrefix.get -> string!
 SA3D.Texturing.Texname.TextureNameList.Read(Amicitia.IO.Binary.BinaryObjectReader! reader, SA3D.Common.Lookup.BaseLUT? lut) -> void
 SA3D.Texturing.Texname.TextureNameList.TextureNameList() -> void
 SA3D.Texturing.Texname.TextureNameList.TextureNameList(string! label, SA3D.Common.Lookup.LabeledArray<SA3D.Texturing.Texname.TextureName!>! textureNames) -> void
 SA3D.Texturing.Texname.TextureNameList.TextureNames.get -> SA3D.Common.Lookup.LabeledArray<SA3D.Texturing.Texname.TextureName!>!
 SA3D.Texturing.Texname.TextureNameList.Write(Amicitia.IO.Binary.BinaryObjectWriter! writer, SA3D.Common.Lookup.BaseLUT? lut) -> void
+SA3D.Texturing.Texname.TextureNameList.Write(SA3D.Common.Ascii.AsciiWriter! writer) -> void

@@ -1,6 +1,7 @@
 ﻿using Amicitia.IO.Binary;
 using J113D.Json;
 using SA3D.Common;
+using SA3D.Common.Ascii;
 using SA3D.Common.Ini;
 using SA3D.Common.IO;
 using SA3D.Common.Lookup;
@@ -18,7 +19,7 @@ namespace SA3D.Texturing.Texname
 	/// Stores a texture name list.
 	/// </summary>
 	[JsonConverter(typeof(JsonConverter))]
-	public class TextureNameList : ILabel, IBinarySerializable<BaseLUT>
+	public class TextureNameList : ILabel, IBinarySerializable<BaseLUT>, IAsciiSerializable
 	{
 		private class JsonConverter : SimpleJsonObjectConverter<TextureNameList>
 		{
@@ -166,6 +167,22 @@ namespace SA3D.Texturing.Texname
 			writer.WriteInt32(TextureNames.Length);
 		}
 
+		/// <inheritdoc/>
+		public void Write(AsciiWriter writer)
+		{
+			using(writer.WriteObjectBlock("TEXTURE_"))
+			{
+				writer.WriteArray("TEXTURENAME", TextureNames);
+
+				using(writer.WriteStructBlock("TEXTURELIST", this))
+				{
+					writer.WriteObjectPropertyLine($"TextureList", TextureNames);
+					writer.WritePropertyLine("TextureNum", TextureNames.Length.ToString());
+				}
+			}
+		}
+
+
 		/// <summary>
 		/// Saves the texture list as a plain text document.
 		/// </summary>
@@ -228,5 +245,8 @@ namespace SA3D.Texturing.Texname
 				labels.Add(Label);
 			}
 		}
+
+
+
 	}
 }
