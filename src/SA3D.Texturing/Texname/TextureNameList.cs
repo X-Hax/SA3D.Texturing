@@ -172,7 +172,7 @@ namespace SA3D.Texturing.Texname
 		{
 			using(writer.WriteObjectBlock("TEXTURE_"))
 			{
-				writer.WriteArray("TEXTURENAME", TextureNames);
+				writer.WriteArray("TEXTURENAME", TextureNames, 0);
 
 				using(writer.WriteStructBlock("TEXTURELIST", this))
 				{
