@@ -5,13 +5,19 @@ using BCnEncoder.Shared;
 using BCnEncoder.Shared.ImageFiles;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Bmp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Pbm;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Qoi;
+using SixLabors.ImageSharp.Formats.Tga;
+using SixLabors.ImageSharp.Formats.Tiff;
+using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Text;
 
 namespace SA3D.Texturing
 {
@@ -139,95 +145,116 @@ namespace SA3D.Texturing
 
 
 		/// <summary>
-		/// Encode the indexed texture as a PNG/DDS file.
+		/// Encode the indexed texture as an image.
 		/// </summary>
-		/// <param name="stream">The file data stream to write to.</param>
+		/// <param name="stream">The stream to write to</param>
+		/// <param name="format">The image format to write as</param>
 		/// <param name="storeInAlpha">Whether the index should be stored in the alpha channel, instead of outputing a grayscale image.</param>
-		public void WriteIndexedAsPNG(Stream stream, bool storeInAlpha)
+		public void WriteImage(Stream stream, ImageFormat format, bool storeInAlpha)
 		{
-			PngEncoder encoder = new()
-			{
-				BitDepth = IsIndex4 ? PngBitDepth.Bit4 : PngBitDepth.Bit8,
-				ColorType = storeInAlpha ? PngColorType.GrayscaleWithAlpha : PngColorType.Grayscale
-			};
+			IImageEncoder? encoder;
 
-			if(storeInAlpha)
+			switch(format)
 			{
-				Image.LoadPixelData<A8>(Data, Width, Height).SaveAsPng(stream, encoder);
+				case ImageFormat.PNG:
+					encoder = new PngEncoder()
+					{
+						BitDepth = IsIndex4 ? PngBitDepth.Bit4 : PngBitDepth.Bit8,
+						ColorType = storeInAlpha ? PngColorType.GrayscaleWithAlpha : PngColorType.Grayscale
+					};
+					break;
+				case ImageFormat.BMP:
+					encoder = new BmpEncoder()
+					{
+						BitsPerPixel = IsIndex4 ? BmpBitsPerPixel.Pixel4 : BmpBitsPerPixel.Pixel8,
+						SupportTransparency = storeInAlpha
+					};
+					break;
+				case ImageFormat.JPEG:
+					encoder = new JpegEncoder()
+					{
+						ColorType = JpegEncodingColor.Luminance
+					};
+					storeInAlpha = false;
+					break;
+				case ImageFormat.PBM:
+					encoder = new PbmEncoder()
+					{
+						ColorType = PbmColorType.Grayscale,
+						ComponentType = PbmComponentType.Byte
+					};
+					storeInAlpha = false;
+					break;
+				case ImageFormat.QOI:
+					encoder = new QoiEncoder()
+					{
+						Channels = storeInAlpha ? QoiChannels.Rgba : QoiChannels.Rgb,
+					};
+					break;
+				case ImageFormat.TGA:
+					encoder = new TgaEncoder()
+					{
+						BitsPerPixel = storeInAlpha ? TgaBitsPerPixel.Pixel32 : TgaBitsPerPixel.Pixel8,
+					};
+					break;
+				case ImageFormat.TIFF:
+					encoder = new TiffEncoder()
+					{
+						BitsPerPixel = storeInAlpha ? TiffBitsPerPixel.Bit32 : TiffBitsPerPixel.Bit24,
+					};
+					break;
+				case ImageFormat.WEBP:
+					encoder = new WebpEncoder()
+					{
+						FileFormat = WebpFileFormatType.Lossless,
+						TransparentColorMode = storeInAlpha ? WebpTransparentColorMode.Preserve : WebpTransparentColorMode.Clear
+					};
+					break;
+				case ImageFormat.DDS:
+					int prevRow = PaletteRow;
+					PaletteRow = 0;
+
+					TexturePalette? prevPalette = Palette;
+					Palette = IsIndex4 ? TexturePalette.Index4Palette : TexturePalette.Index8Palette;
+
+					new BcEncoder(CompressionFormat.R).EncodeToDds(GetColorPixels(), Width, Height, PixelFormat.Rgba32).Write(stream);
+
+					PaletteRow = prevRow;
+					Palette = prevPalette;
+					return;
+				default:
+					throw new ArgumentException("Invalid image format", nameof(format));
 			}
-			else
-			{
-				Image.LoadPixelData<L8>(Data, Width, Height).SaveAsPng(stream, encoder);
-			}
+
+			Image image = storeInAlpha
+				? Image.LoadPixelData<A8>(Data, Width, Height)
+				: Image.LoadPixelData<L8>(Data, Width, Height);
+
+			image.Save(stream, encoder);
 		}
 
 		/// <summary>
-		/// Encode the indexed texture as a PNG file.
+		/// Encode the indexed texture as an image.
 		/// </summary>
+		/// <param name="format">The image format to write as</param>
 		/// <param name="storeInAlpha">Whether the index should be stored in the alpha channel, instead of outputing a grayscale image.</param>
-		public byte[] WriteIndexedAsPNGToBytes(bool storeInAlpha)
+		public byte[] WriteImageToBytes(ImageFormat format, bool storeInAlpha)
 		{
-			using(MemoryStream stream = new())
-			{
-				WriteIndexedAsPNG(stream, storeInAlpha);
-				return stream.ToArray();
-			}
+			using MemoryStream stream = new();
+			WriteImage(stream, format, storeInAlpha);
+			return stream.ToArray();
 		}
 
 		/// <summary>
 		/// Write the indexed texture to a PNG file.
 		/// </summary>
 		/// <param name="filepath">The path to the file to write to.</param>
+		/// <param name="format">The image format to write as</param>
 		/// <param name="storeInAlpha">Whether the index should be stored in the alpha channel, instead of outputing a grayscale image.</param>
-		public void WriteIndexedAsPNGToFile(string filepath, bool storeInAlpha)
+		public void WriteImageToFile(string filepath, ImageFormat format, bool storeInAlpha)
 		{
-			using(FileStream stream = File.Create(filepath))
-			{
-				WriteIndexedAsPNG(stream, storeInAlpha);
-			}
-		}
-
-
-		/// <summary>
-		/// Encode the indexed texture as a DDS file.
-		/// </summary>
-		/// <param name="stream">The file data stream to write to.</param>
-		public void WriteIndexedAsDDS(Stream stream)
-		{
-			int prevRow = PaletteRow;
-			PaletteRow = 0;
-
-			TexturePalette? prevPalette = Palette;
-			Palette = IsIndex4 ? TexturePalette.Index4Palette : TexturePalette.Index8Palette;
-
-			new BcEncoder(CompressionFormat.R).EncodeToDds(GetColorPixels(), Width, Height, PixelFormat.Rgba32).Write(stream);
-
-			PaletteRow = prevRow;
-			Palette = prevPalette;
-		}
-
-		/// <summary>
-		/// Encode the indexed texture as a DDS file.
-		/// </summary>
-		public byte[] WriteIndexedAsDDSToBytes()
-		{
-			using(MemoryStream stream = new())
-			{
-				WriteIndexedAsDDS(stream);
-				return stream.ToArray();
-			}
-		}
-
-		/// <summary>
-		/// Write the indexed texture to a DDS file.
-		/// </summary>
-		/// <param name="filepath">The path to the file to write to.</param>
-		public void WriteIndexedAsDDSToFile(string filepath)
-		{
-			using(FileStream stream = File.Create(filepath))
-			{
-				WriteIndexedAsDDS(stream);
-			}
+			using FileStream stream = File.Create(filepath);
+			WriteImage(stream, format, storeInAlpha);
 		}
 
 

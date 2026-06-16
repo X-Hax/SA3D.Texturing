@@ -1,7 +1,15 @@
 ﻿using BCnEncoder.Encoder;
 using BCnEncoder.Shared;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Bmp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Pbm;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Qoi;
+using SixLabors.ImageSharp.Formats.Tga;
+using SixLabors.ImageSharp.Formats.Tiff;
+using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.IO;
@@ -58,6 +66,7 @@ namespace SA3D.Texturing
 		/// </summary>
 		public int ProcessedHeight => OverrideHeight == 0 ? Height : OverrideHeight;
 
+
 		/// <summary>
 		/// Creates a new texture from preexisting data.
 		/// </summary>
@@ -87,6 +96,7 @@ namespace SA3D.Texturing
 			Data = data;
 
 		}
+
 
 		/// <summary>
 		/// Replaces texture dimensions and raw data.
@@ -126,7 +136,20 @@ namespace SA3D.Texturing
 		/// Checks whether any pixel has an alpha value below 255.
 		/// </summary>
 		/// <returns>Whether any pixel is has an alpha value below 255</returns>
-		public abstract bool CheckIsTransparent();
+		public virtual bool CheckIsTransparent()
+		{
+			ReadOnlySpan<byte> colorData = GetColorPixels();
+
+			for(int i = 3; i < colorData.Length; i += 4)
+			{
+				if(colorData[i] < 0xFF)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
 
 
 		/// <summary>
@@ -145,7 +168,7 @@ namespace SA3D.Texturing
 			else
 			{
 				stream.Seek(dataStart, SeekOrigin.Begin);
-				return ColorTexture.ReadColored(stream, filename);
+				return ColorTexture.ReadImage(stream, filename);
 			}
 		}
 
@@ -176,93 +199,100 @@ namespace SA3D.Texturing
 
 
 		/// <summary>
-		/// Encode the colored texture as a PNG file and write it to a stream.
+		/// Encode the colored texture as the given image format
 		/// </summary>
-		/// <param name="stream">The stream to write to.</param>
-		public void WriteColoredAsPNG(Stream stream)
+		/// <param name="stream">The stream to write to</param>
+		/// <param name="format">The format to write as</param>
+		/// <exception cref="ArgumentException"></exception>
+		public void WriteColorImage(Stream stream, ImageFormat format)
 		{
 			ReadOnlySpan<byte> colorData = GetColorPixels();
-			PngEncoder encoder = new()
-			{
-				ColorType = CheckIsTransparent() ? PngColorType.RgbWithAlpha : PngColorType.Rgb,
-				TransparentColorMode = PngTransparentColorMode.Preserve,
-				ChunkFilter = PngChunkFilter.ExcludeAll
-			};
-			Image.LoadPixelData<Rgba32>(colorData, Width, Height).SaveAsPng(stream, encoder);
-		}
+			bool isTransparent = CheckIsTransparent();
+			IImageEncoder? encoder;
 
-		/// <summary>
-		/// Encode the colored texture as a PNG file.
-		/// </summary>
-		public byte[] WriteColoredAsPNGToBytes()
-		{
-			byte[] result;
-
-			using(MemoryStream stream = new())
+			switch(format)
 			{
-				WriteColoredAsPNG(stream);
-				result = stream.ToArray();
+				case ImageFormat.PNG:
+					encoder = new PngEncoder()
+					{
+						ColorType = isTransparent ? PngColorType.RgbWithAlpha : PngColorType.Rgb,
+						TransparentColorMode = PngTransparentColorMode.Preserve,
+						ChunkFilter = PngChunkFilter.ExcludeAll
+					};
+					break;
+				case ImageFormat.BMP:
+					encoder = new BmpEncoder()
+					{
+						BitsPerPixel = isTransparent ? BmpBitsPerPixel.Pixel32 : BmpBitsPerPixel.Pixel24,
+						SupportTransparency = isTransparent
+					};
+					break;
+				case ImageFormat.JPEG:
+					encoder = new JpegEncoder();
+					break;
+				case ImageFormat.PBM:
+					encoder = new PbmEncoder()
+					{
+						ColorType = PbmColorType.Rgb,
+						ComponentType = PbmComponentType.Byte
+					};
+					break;
+				case ImageFormat.QOI:
+					encoder = new QoiEncoder()
+					{
+						Channels = isTransparent ? QoiChannels.Rgba : QoiChannels.Rgb
+					};
+					break;
+				case ImageFormat.TGA:
+					encoder = new TgaEncoder()
+					{
+						BitsPerPixel = isTransparent ? TgaBitsPerPixel.Pixel32 : TgaBitsPerPixel.Pixel24
+					};
+					break;
+				case ImageFormat.TIFF:
+					encoder = new TiffEncoder()
+					{
+						BitsPerPixel = isTransparent ? TiffBitsPerPixel.Bit32 : TiffBitsPerPixel.Bit24
+					};
+					break;
+				case ImageFormat.WEBP:
+					encoder = new WebpEncoder()
+					{
+						FileFormat = WebpFileFormatType.Lossless,
+						TransparentColorMode = isTransparent ? WebpTransparentColorMode.Preserve : WebpTransparentColorMode.Clear
+					};
+					break;
+				case ImageFormat.DDS:
+					BcEncoder bcEncoder = new(isTransparent ? CompressionFormat.Bc3 : CompressionFormat.Bc1);
+					bcEncoder.EncodeToDds(colorData, Width, Height, PixelFormat.Rgba32).Write(stream);
+					return;
+				default:
+					throw new ArgumentException("Invalid image format", nameof(format));
 			}
 
-			return result;
+			Image.LoadPixelData<Rgba32>(colorData, Width, Height).Save(stream, encoder);
 		}
 
 		/// <summary>
-		/// Write the colored texture to a PNG file.
+		/// Encode the colored texture as an image file.
+		/// </summary>
+		/// <param name="format">The format to write as</param>
+		public byte[] WriteColorImageToBytes(ImageFormat format)
+		{
+			using MemoryStream stream = new();
+			WriteColorImage(stream, format);
+			return stream.ToArray();
+		}
+
+		/// <summary>
+		/// Write the colored texture to an image file.
 		/// </summary>
 		/// <param name="filepath">Path to the file to write to.</param>
-		public void WriteColoredAsPNGToFile(string filepath)
+		/// <param name="format">The format to write as</param>
+		public void WriteColorImageToFile(string filepath, ImageFormat format)
 		{
-			using(FileStream stream = File.Create(filepath))
-			{
-				WriteColoredAsPNG(stream);
-			}
-		}
-
-
-		/// <summary>
-		/// Encode the colored texture as a DDS file and write it to a stream.
-		/// </summary>
-		/// <param name="stream">The stream to write to.</param>
-		public void WriteColoredAsDDS(Stream stream)
-		{
-			ReadOnlySpan<byte> colorData = GetColorPixels();
-			if(CheckIsTransparent())
-			{
-				new BcEncoder(CompressionFormat.Bc3).EncodeToDds(colorData, Width, Height, PixelFormat.Rgba32).Write(stream);
-			}
-			else
-			{
-				new BcEncoder(CompressionFormat.Bc1).EncodeToDds(colorData, Width, Height, PixelFormat.Rgba32).Write(stream);
-			}
-		}
-
-		/// <summary>
-		/// Encode the colored texture as a DDS file.
-		/// </summary>
-		public byte[] WriteColoredAsDDSToBytes()
-		{
-			byte[] result;
-
-			using(MemoryStream stream = new())
-			{
-				WriteColoredAsDDS(stream);
-				result = stream.ToArray();
-			}
-
-			return result;
-		}
-
-		/// <summary>
-		/// Write the colored texture to a DDS file.
-		/// </summary>
-		/// <param name="filepath">Path to the file to write to.</param>
-		public void WriteColoredAsDDSToFile(string filepath)
-		{
-			using(FileStream stream = File.Create(filepath))
-			{
-				WriteColoredAsDDS(stream);
-			}
+			using FileStream stream = File.Create(filepath);
+			WriteColorImage(stream, format);
 		}
 
 
