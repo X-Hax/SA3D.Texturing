@@ -1,9 +1,6 @@
 ﻿#nullable enable
 abstract SA3D.Texturing.Texture.CalculateExpectedDataLength(int width, int height) -> int
-abstract SA3D.Texturing.Texture.CheckIsTransparent() -> bool
 abstract SA3D.Texturing.Texture.GetColorPixels() -> System.ReadOnlySpan<byte>
-const SA3D.Texturing.Texname.TextureName.StructSize = 12 -> int
-override SA3D.Texturing.ColorTexture.CheckIsTransparent() -> bool
 override SA3D.Texturing.ColorTexture.GetColorPixels() -> System.ReadOnlySpan<byte>
 override SA3D.Texturing.IndexTexture.CheckIsTransparent() -> bool
 override SA3D.Texturing.IndexTexture.GetColorPixels() -> System.ReadOnlySpan<byte>
@@ -26,12 +23,6 @@ SA3D.Texturing.IndexTexture.Palette.get -> SA3D.Texturing.TexturePalette?
 SA3D.Texturing.IndexTexture.Palette.set -> void
 SA3D.Texturing.IndexTexture.PaletteRow.get -> int
 SA3D.Texturing.IndexTexture.PaletteRow.set -> void
-SA3D.Texturing.IndexTexture.WriteIndexedAsDDS(System.IO.Stream! stream) -> void
-SA3D.Texturing.IndexTexture.WriteIndexedAsDDSToBytes() -> byte[]!
-SA3D.Texturing.IndexTexture.WriteIndexedAsDDSToFile(string! filepath) -> void
-SA3D.Texturing.IndexTexture.WriteIndexedAsPNG(System.IO.Stream! stream, bool storeInAlpha) -> void
-SA3D.Texturing.IndexTexture.WriteIndexedAsPNGToBytes(bool storeInAlpha) -> byte[]!
-SA3D.Texturing.IndexTexture.WriteIndexedAsPNGToFile(string! filepath, bool storeInAlpha) -> void
 SA3D.Texturing.Texname.TextureName
 SA3D.Texturing.Texname.TextureName.Attributes.get -> uint
 SA3D.Texturing.Texname.TextureName.Name.get -> string?
@@ -62,12 +53,6 @@ SA3D.Texturing.Texture.ProcessedWidth.get -> int
 SA3D.Texturing.Texture.ReplaceData(int width, int height, byte[]! data) -> void
 SA3D.Texturing.Texture.Texture(int width, int height, byte[]! data, string! name, uint globalIndex) -> void
 SA3D.Texturing.Texture.Width.get -> int
-SA3D.Texturing.Texture.WriteColoredAsDDS(System.IO.Stream! stream) -> void
-SA3D.Texturing.Texture.WriteColoredAsDDSToBytes() -> byte[]!
-SA3D.Texturing.Texture.WriteColoredAsDDSToFile(string! filepath) -> void
-SA3D.Texturing.Texture.WriteColoredAsPNG(System.IO.Stream! stream) -> void
-SA3D.Texturing.Texture.WriteColoredAsPNGToBytes() -> byte[]!
-SA3D.Texturing.Texture.WriteColoredAsPNGToFile(string! filepath) -> void
 SA3D.Texturing.TexturePalette
 SA3D.Texturing.TexturePalette.ColorData.get -> System.ReadOnlySpan<byte>
 SA3D.Texturing.TexturePalette.Name.get -> string!
@@ -76,16 +61,12 @@ SA3D.Texturing.TexturePalette.TexturePalette(byte[]! colorData) -> void
 SA3D.Texturing.TexturePalette.TexturePalette(string! name, byte[]! colorData) -> void
 SA3D.Texturing.TexturePalette.Width.get -> int
 SA3D.Texturing.TextureSet
-SA3D.Texturing.TextureSet.ExportTexturePack(string! outDirectory, bool useDDS = false) -> void
 SA3D.Texturing.TextureSet.Textures.get -> System.Collections.ObjectModel.ReadOnlyCollection<SA3D.Texturing.Texture!>!
 SA3D.Texturing.TextureSet.TextureSet(SA3D.Texturing.Texture![]! textures) -> void
 SA3D.Texturing.TextureSet.WriteContentIndex(System.IO.TextWriter! writer, string! nameSuffix) -> void
 SA3D.Texturing.TextureSet.WriteContentIndexToFile(string! filepath, string! nameSuffix) -> void
 SA3D.Texturing.TextureSet.WriteContentIndexToText(string! nameSuffix) -> string!
 SA3D.Texturing.TextureUtilities
-static SA3D.Texturing.ColorTexture.ReadColored(byte[]! data, string! filename) -> SA3D.Texturing.ColorTexture!
-static SA3D.Texturing.ColorTexture.ReadColored(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.ColorTexture!
-static SA3D.Texturing.ColorTexture.ReadColoredFromFile(string! filepath) -> SA3D.Texturing.ColorTexture!
 static SA3D.Texturing.ImageSharpExtensions.CreatePaletteQuantizer(this SA3D.Texturing.TexturePalette! palette, int width, int offset, bool dither) -> SixLabors.ImageSharp.Processing.Processors.Quantization.PaletteQuantizer!
 static SA3D.Texturing.ImageSharpExtensions.ToImageSharp(this SA3D.Texturing.Texture! texture) -> SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>!
 static SA3D.Texturing.ImageSharpExtensions.ToImageSharp(this SA3D.Texturing.TexturePalette! palette, int? rowWidth = null) -> SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>!

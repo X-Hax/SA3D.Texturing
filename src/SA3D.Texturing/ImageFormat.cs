@@ -16,9 +16,9 @@
 		BMP,
 
 		/// <summary>
-		/// Joint photographic experts group
+		/// Joint photographic (experts) group
 		/// </summary>
-		JPEG,
+		JPG,
 
 		/// <summary>
 		/// Portable bitmap

@@ -74,11 +74,6 @@ namespace SA3D.Texturing.Texname
 		}
 
 		/// <summary>
-		/// Size of the struct in bytes.
-		/// </summary>
-		public const int StructSize = 0xC;
-
-		/// <summary>
 		/// The texture name.
 		/// </summary>
 		public string? Name { get; set; }

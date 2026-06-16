@@ -17,7 +17,6 @@ using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text;
 
 namespace SA3D.Texturing
 {
@@ -97,7 +96,28 @@ namespace SA3D.Texturing
 		/// <inheritdoc/>
 		public override bool CheckIsTransparent()
 		{
-			return false;
+			if(Palette == null)
+			{
+				return false;
+			}
+
+			bool anyTransparent = false;
+			ReadOnlySpan<byte> palette = Palette.ColorData;
+			for(int i = 3; i < Palette.Width; i += 4)
+			{
+				if(palette[i] <= 255)
+				{
+					anyTransparent = true;
+					break;
+				}
+			}
+
+			if(!anyTransparent)
+			{
+				return false;
+			}
+
+			return base.CheckIsTransparent();
 		}
 
 		/// <inheritdoc/>
@@ -150,7 +170,7 @@ namespace SA3D.Texturing
 		/// <param name="stream">The stream to write to</param>
 		/// <param name="format">The image format to write as</param>
 		/// <param name="storeInAlpha">Whether the index should be stored in the alpha channel, instead of outputing a grayscale image.</param>
-		public void WriteImage(Stream stream, ImageFormat format, bool storeInAlpha)
+		public void WriteIndexImage(Stream stream, ImageFormat format, bool storeInAlpha)
 		{
 			IImageEncoder? encoder;
 
@@ -170,7 +190,7 @@ namespace SA3D.Texturing
 						SupportTransparency = storeInAlpha
 					};
 					break;
-				case ImageFormat.JPEG:
+				case ImageFormat.JPG:
 					encoder = new JpegEncoder()
 					{
 						ColorType = JpegEncodingColor.Luminance
@@ -238,10 +258,10 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="format">The image format to write as</param>
 		/// <param name="storeInAlpha">Whether the index should be stored in the alpha channel, instead of outputing a grayscale image.</param>
-		public byte[] WriteImageToBytes(ImageFormat format, bool storeInAlpha)
+		public byte[] WriteIndexImageToBytes(ImageFormat format, bool storeInAlpha)
 		{
 			using MemoryStream stream = new();
-			WriteImage(stream, format, storeInAlpha);
+			WriteIndexImage(stream, format, storeInAlpha);
 			return stream.ToArray();
 		}
 
@@ -251,10 +271,10 @@ namespace SA3D.Texturing
 		/// <param name="filepath">The path to the file to write to.</param>
 		/// <param name="format">The image format to write as</param>
 		/// <param name="storeInAlpha">Whether the index should be stored in the alpha channel, instead of outputing a grayscale image.</param>
-		public void WriteImageToFile(string filepath, ImageFormat format, bool storeInAlpha)
+		public void WriteIndexImageToFile(string filepath, ImageFormat format, bool storeInAlpha)
 		{
 			using FileStream stream = File.Create(filepath);
-			WriteImage(stream, format, storeInAlpha);
+			WriteIndexImage(stream, format, storeInAlpha);
 		}
 
 

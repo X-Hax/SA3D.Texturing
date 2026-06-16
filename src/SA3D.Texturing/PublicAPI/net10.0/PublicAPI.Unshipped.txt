@@ -1,4 +1,17 @@
-﻿SA3D.Texturing.Texname.TextureName.Read(Amicitia.IO.Binary.BinaryObjectReader! reader) -> void
+﻿SA3D.Texturing.ImageFormat
+SA3D.Texturing.ImageFormat.BMP = 1 -> SA3D.Texturing.ImageFormat
+SA3D.Texturing.ImageFormat.DDS = 8 -> SA3D.Texturing.ImageFormat
+SA3D.Texturing.ImageFormat.JPG = 2 -> SA3D.Texturing.ImageFormat
+SA3D.Texturing.ImageFormat.PBM = 3 -> SA3D.Texturing.ImageFormat
+SA3D.Texturing.ImageFormat.PNG = 0 -> SA3D.Texturing.ImageFormat
+SA3D.Texturing.ImageFormat.QOI = 4 -> SA3D.Texturing.ImageFormat
+SA3D.Texturing.ImageFormat.TGA = 5 -> SA3D.Texturing.ImageFormat
+SA3D.Texturing.ImageFormat.TIFF = 6 -> SA3D.Texturing.ImageFormat
+SA3D.Texturing.ImageFormat.WEBP = 7 -> SA3D.Texturing.ImageFormat
+SA3D.Texturing.IndexTexture.WriteIndexImage(System.IO.Stream! stream, SA3D.Texturing.ImageFormat format, bool storeInAlpha) -> void
+SA3D.Texturing.IndexTexture.WriteIndexImageToBytes(SA3D.Texturing.ImageFormat format, bool storeInAlpha) -> byte[]!
+SA3D.Texturing.IndexTexture.WriteIndexImageToFile(string! filepath, SA3D.Texturing.ImageFormat format, bool storeInAlpha) -> void
+SA3D.Texturing.Texname.TextureName.Read(Amicitia.IO.Binary.BinaryObjectReader! reader) -> void
 SA3D.Texturing.Texname.TextureName.TextureName() -> void
 SA3D.Texturing.Texname.TextureName.Write(Amicitia.IO.Binary.BinaryObjectWriter! writer) -> void
 SA3D.Texturing.Texname.TextureName.Write(SA3D.Common.Ascii.AsciiWriter! writer) -> void
@@ -9,3 +22,11 @@ SA3D.Texturing.Texname.TextureNameList.TextureNameList(string! label, SA3D.Commo
 SA3D.Texturing.Texname.TextureNameList.TextureNames.get -> SA3D.Common.Lookup.LabeledArray<SA3D.Texturing.Texname.TextureName!>!
 SA3D.Texturing.Texname.TextureNameList.Write(Amicitia.IO.Binary.BinaryObjectWriter! writer, SA3D.Common.Lookup.BaseLUT? lut) -> void
 SA3D.Texturing.Texname.TextureNameList.Write(SA3D.Common.Ascii.AsciiWriter! writer) -> void
+SA3D.Texturing.Texture.WriteColorImage(System.IO.Stream! stream, SA3D.Texturing.ImageFormat format) -> void
+SA3D.Texturing.Texture.WriteColorImageToBytes(SA3D.Texturing.ImageFormat format) -> byte[]!
+SA3D.Texturing.Texture.WriteColorImageToFile(string! filepath, SA3D.Texturing.ImageFormat format) -> void
+SA3D.Texturing.TextureSet.ExportTexturePack(string! outDirectory, SA3D.Texturing.ImageFormat format) -> void
+static SA3D.Texturing.ColorTexture.ReadImage(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.ColorTexture!
+static SA3D.Texturing.ColorTexture.ReadImageFromBytes(byte[]! data, string! filename) -> SA3D.Texturing.ColorTexture!
+static SA3D.Texturing.ColorTexture.ReadImageFromFile(string! filepath) -> SA3D.Texturing.ColorTexture!
+virtual SA3D.Texturing.Texture.CheckIsTransparent() -> bool

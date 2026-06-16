@@ -227,7 +227,7 @@ namespace SA3D.Texturing
 						SupportTransparency = isTransparent
 					};
 					break;
-				case ImageFormat.JPEG:
+				case ImageFormat.JPG:
 					encoder = new JpegEncoder();
 					break;
 				case ImageFormat.PBM:

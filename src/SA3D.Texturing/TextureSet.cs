@@ -70,37 +70,24 @@ namespace SA3D.Texturing
 		/// Exports the texture set as a texture pack useable by sonic adventure modloaders.
 		/// </summary>
 		/// <param name="outDirectory">The directory to which to write the files.</param>
-		/// <param name="useDDS">Whether to export the texture as DDS files.</param>
-		public void ExportTexturePack(string outDirectory, bool useDDS = false)
+		/// <param name="format">Format to write images in</param>
+		public void ExportTexturePack(string outDirectory, ImageFormat format)
 		{
-			string extension = useDDS ? ".dds" : ".png";
+			string extension = "." + format.ToString().ToLowerInvariant();
 			string indexPath = Path.Join(outDirectory, "index.txt");
 			WriteContentIndexToFile(indexPath, extension);
 
 			foreach(Texture texture in Textures)
 			{
 				string path = Path.Join(outDirectory, texture.Name + extension);
+
 				if(texture is IndexTexture indexTex)
 				{
-					if(useDDS)
-					{
-						indexTex.WriteIndexedAsDDSToFile(path);
-					}
-					else
-					{
-						indexTex.WriteIndexedAsPNGToFile(path, false);
-					}
+					indexTex.WriteIndexImageToFile(path, format, false);
 				}
 				else
 				{
-					if(useDDS)
-					{
-						texture.WriteColoredAsDDSToFile(path);
-					}
-					else
-					{
-						texture.WriteColoredAsPNGToFile(path);
-					}
+					texture.WriteColorImageToFile(path, format);
 				}
 			}
 		}
