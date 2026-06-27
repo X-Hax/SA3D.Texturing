@@ -42,10 +42,7 @@ SA3D.Texturing.TexturePalette.TexturePalette(byte[]! colorData) -> void
 SA3D.Texturing.TexturePalette.TexturePalette(string! name, byte[]! colorData) -> void
 SA3D.Texturing.TexturePalette.Width.get -> int
 SA3D.Texturing.TextureSet
-SA3D.Texturing.TextureSet.WriteContentIndex(System.IO.TextWriter! writer, string! nameSuffix) -> void
-SA3D.Texturing.TextureSet.WriteContentIndexToFile(string! filepath, string! nameSuffix) -> void
 SA3D.Texturing.TextureUtilities
 static SA3D.Texturing.Texname.TextureNameList.ReadFromTextFile(string! filepath) -> SA3D.Texturing.Texname.TextureNameList!
-static SA3D.Texturing.TextureSet.ImportTexturePack(string! directory) -> SA3D.Texturing.TextureSet!
 static SA3D.Texturing.TextureUtilities.GetLuminance(byte red, byte green, byte blue) -> byte
 static SA3D.Texturing.TextureUtilities.GetLuminance(System.ReadOnlySpan<byte> color) -> byte
