@@ -45,7 +45,7 @@ SA3D.Texturing.ITexture.RealHeight.get -> int
 SA3D.Texturing.ITexture.RealWidth.get -> int
 SA3D.Texturing.ITexture.Width.get -> int
 SA3D.Texturing.ITexturePalette
-SA3D.Texturing.ITexturePalette.ColorData.get -> System.ReadOnlySpan<byte>
+SA3D.Texturing.ITexturePalette.GetColorData() -> System.ReadOnlySpan<byte>
 SA3D.Texturing.ITexturePalette.GetDefaultPalette(bool index4) -> SA3D.Texturing.ITexturePalette!
 SA3D.Texturing.ITexturePalette.Index4Palette.get -> SA3D.Texturing.ITexturePalette!
 SA3D.Texturing.ITexturePalette.Index8Palette.get -> SA3D.Texturing.ITexturePalette!
@@ -86,7 +86,7 @@ SA3D.Texturing.ReadOnlyTexture.ReadOnlyTexture(int width, int height, byte[]! da
 SA3D.Texturing.ReadOnlyTexture.ReadOnlyTexture(SA3D.Texturing.ITexture! texture) -> void
 SA3D.Texturing.ReadOnlyTexture.Width.get -> int
 SA3D.Texturing.ReadOnlyTexturePalette
-SA3D.Texturing.ReadOnlyTexturePalette.ColorData.get -> System.ReadOnlySpan<byte>
+SA3D.Texturing.ReadOnlyTexturePalette.GetColorData() -> System.ReadOnlySpan<byte>
 SA3D.Texturing.ReadOnlyTexturePalette.Name.get -> string!
 SA3D.Texturing.ReadOnlyTexturePalette.ReadOnlyTexturePalette(byte[]! colorData) -> void
 SA3D.Texturing.ReadOnlyTexturePalette.ReadOnlyTexturePalette(string! name, byte[]! colorData) -> void
@@ -106,6 +106,8 @@ SA3D.Texturing.Texture.GetPixelData() -> System.ReadOnlySpan<byte>
 SA3D.Texturing.Texture.Texture(int width, int height, byte[]! data) -> void
 SA3D.Texturing.Texture.Texture(SA3D.Texturing.ITexture! texture) -> void
 SA3D.Texturing.TextureFileUtilities
+SA3D.Texturing.TexturePalette.ColorData.get -> byte[]!
+SA3D.Texturing.TexturePalette.GetColorData() -> System.ReadOnlySpan<byte>
 SA3D.Texturing.TexturePalette.SetColors(byte[]! data) -> void
 SA3D.Texturing.TextureSet.ExportTexturePack(string! outDirectory, SA3D.Texturing.ImageFormat format) -> void
 SA3D.Texturing.TextureSet.Textures.get -> System.Collections.ObjectModel.ReadOnlyCollection<SA3D.Texturing.ITexture!>!
@@ -137,4 +139,4 @@ static SA3D.Texturing.TextureFileUtilities.WriteIndexImageToBytes(this SA3D.Text
 static SA3D.Texturing.TextureFileUtilities.WriteIndexImageToFile(this SA3D.Texturing.IIndexTexture! texture, string! filepath, SA3D.Texturing.ImageFormat format, bool storeInAlpha) -> void
 static SA3D.Texturing.TextureUtilities.Palettize(this SA3D.Texturing.ITexture! texture, bool index4, bool dither) -> SA3D.Texturing.IndexTexture!
 static SA3D.Texturing.TextureUtilities.SortByLuminance(this SA3D.Texturing.ITexturePalette! palette) -> SA3D.Texturing.TexturePalette!
-static SA3D.Texturing.TextureUtilities.TryGenerateExactPalette(this SA3D.Texturing.ITexture! texture, bool index4, out SA3D.Texturing.TexturePalette! palette) -> bool
+static SA3D.Texturing.TextureUtilities.TryGenerateExactPalette(this SA3D.Texturing.ITexture! texture, bool index4, out SA3D.Texturing.TexturePalette? palette) -> bool

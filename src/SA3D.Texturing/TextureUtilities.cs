@@ -43,7 +43,7 @@ namespace SA3D.Texturing
 		public static TexturePalette SortByLuminance(this ITexturePalette palette)
 		{
 			(int, byte)[] luminanceLUT = new (int, byte)[palette.Width];
-			ReadOnlySpan<byte> data = palette.ColorData;
+			ReadOnlySpan<byte> data = palette.GetColorData();
 
 			for(int i = 0; i < luminanceLUT.Length; i++)
 			{
@@ -71,7 +71,7 @@ namespace SA3D.Texturing
 		/// <param name="index4">Whether to use 4 bit indices instead of 8.</param>
 		/// <param name="palette">The generated palette.</param>
 		/// <returns>Whether the palette was successfully generated. If false, the texture has more colors than the palette can hold.</returns>
-		public static bool TryGenerateExactPalette(this ITexture texture, bool index4, [MaybeNullWhen(false)] out TexturePalette palette)
+		public static bool TryGenerateExactPalette(this ITexture texture, bool index4, [NotNullWhen(true)] out TexturePalette? palette)
 		{
 			palette = null;
 

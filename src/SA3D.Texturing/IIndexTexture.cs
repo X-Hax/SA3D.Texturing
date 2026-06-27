@@ -35,16 +35,9 @@ namespace SA3D.Texturing
 		/// <returns></returns>
 		public ReadOnlySpan<byte> GetUsedPaletteColors()
 		{
-			ITexturePalette palette = Palette ?? ITexturePalette.GetDefaultPalette(IsIndex4);
-
-			if(IsIndex4)
-			{
-				return palette.ColorData.Slice(16 * PaletteRow % palette.Width * 4, 64);
-			}
-			else
-			{
-				return palette.ColorData.Slice(256 * PaletteRow % palette.Width * 4, 1024);
-			}
+			ReadOnlySpan<byte> colorData = (Palette ?? ITexturePalette.GetDefaultPalette(IsIndex4)).GetColorData();
+			int paletteSize = IsIndex4 ? 16 : 256;
+			return colorData.Slice(paletteSize * PaletteRow % colorData.Length, paletteSize * 4);
 		}
 
 

@@ -38,7 +38,7 @@ namespace SA3D.Texturing
 				throw new ArgumentException($"Palette Width ({palette.Width}) is not a multiple of specified row width ({rowWidth})!");
 			}
 
-			return Image.LoadPixelData<Rgba32>(palette.ColorData, rowWidth.Value, palette.Width / rowWidth.Value);
+			return Image.LoadPixelData<Rgba32>(palette.GetColorData(), rowWidth.Value, palette.Width / rowWidth.Value);
 		}
 
 		/// <summary>
@@ -86,7 +86,7 @@ namespace SA3D.Texturing
 		public static PaletteQuantizer CreatePaletteQuantizer(this ITexturePalette palette, int width, int offset, bool dither)
 		{
 			Color[] paletteColors = new Color[width];
-			ReadOnlySpan<byte> colorData = palette.ColorData;
+			ReadOnlySpan<byte> colorData = palette.GetColorData();
 
 			for(int i = 0; i < width; i++)
 			{

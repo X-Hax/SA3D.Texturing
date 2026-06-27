@@ -36,7 +36,6 @@ SA3D.Texturing.Texture.OverrideWidth.set -> void
 SA3D.Texturing.Texture.ReplaceData(int width, int height, byte[]! data) -> void
 SA3D.Texturing.Texture.Width.get -> int
 SA3D.Texturing.TexturePalette
-SA3D.Texturing.TexturePalette.ColorData.get -> System.ReadOnlySpan<byte>
 SA3D.Texturing.TexturePalette.Name.get -> string!
 SA3D.Texturing.TexturePalette.Name.set -> void
 SA3D.Texturing.TexturePalette.TexturePalette(byte[]! colorData) -> void

@@ -15,9 +15,6 @@ namespace SA3D.Texturing
 		/// <inheritdoc/>
 		public int Width => _colorData.Length / 4;
 
-		/// <inheritdoc/>
-		public ReadOnlySpan<byte> ColorData => _colorData;
-
 
 		/// <summary>
 		/// Create a new palette off color data
@@ -35,5 +32,11 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="colorData">Palette colors</param>
 		public ReadOnlyTexturePalette(byte[] colorData) : this(string.Empty, colorData) { }
+
+		/// <inheritdoc/>
+		public ReadOnlySpan<byte> GetColorData()
+		{
+			return _colorData;
+		}
 	}
 }

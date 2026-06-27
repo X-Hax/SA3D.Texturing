@@ -28,11 +28,6 @@ namespace SA3D.Texturing
 		/// </summary>
 		public int Width { get; }
 
-		/// <summary>
-		/// RGBA palette colors
-		/// </summary>
-		public ReadOnlySpan<byte> ColorData { get; }
-
 
 		static ITexturePalette()
 		{
@@ -62,6 +57,14 @@ namespace SA3D.Texturing
 			Index4Palette = new ReadOnlyTexturePalette(index4);
 			Index8Palette = new ReadOnlyTexturePalette(index8);
 		}
+
+
+		/// <summary>
+		/// Get RGBA32 color data
+		/// </summary>
+		/// <returns></returns>
+		public ReadOnlySpan<byte> GetColorData();
+
 
 		/// <summary>
 		/// Returns either <see cref="Index4Palette"/> or <see cref="Index8Palette"/> based on <paramref name="index4"/>.

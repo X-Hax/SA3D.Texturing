@@ -7,17 +7,16 @@ namespace SA3D.Texturing
 	/// </summary>
 	public class TexturePalette : ITexturePalette
 	{
-		private byte[] _colorData;
+		/// <summary>
+		/// Color data of the palette
+		/// </summary>
+		public byte[] ColorData { get; private set; }
 
 		/// <inheritdoc/>
 		public string Name { get; set; }
 
 		/// <inheritdoc/>
-		public int Width => _colorData.Length / 4;
-
-		/// <inheritdoc/>
-		public ReadOnlySpan<byte> ColorData
-			=> _colorData;
+		public int Width => ColorData.Length / 4;
 
 
 		/// <summary>
@@ -27,8 +26,13 @@ namespace SA3D.Texturing
 		/// <param name="colorData">Palette colors</param>
 		public TexturePalette(string name, byte[] colorData)
 		{
+			if(colorData.Length % 4 != 0)
+			{
+				throw new ArgumentException("Data has an invalid length; Must be multiple of 4!", nameof(ColorData));
+			}
+
 			Name = name;
-			_colorData = colorData;
+			ColorData = colorData;
 		}
 
 		/// <summary>
@@ -36,6 +40,13 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="colorData">Palette Colors</param>
 		public TexturePalette(byte[] colorData) : this(string.Empty, colorData) { }
+
+
+		/// <inheritdoc/>
+		public ReadOnlySpan<byte> GetColorData()
+		{
+			return ColorData;
+		}
 
 
 		/// <summary>
@@ -50,7 +61,7 @@ namespace SA3D.Texturing
 				throw new ArgumentException("Data has an invalid length; Must be multiple of 4!", nameof(ColorData));
 			}
 
-			_colorData = data;
+			ColorData = data;
 		}
 	}
 }
