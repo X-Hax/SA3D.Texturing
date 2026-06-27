@@ -6,7 +6,7 @@ namespace SA3D.Texturing
 	/// <summary>
 	/// Read-only index texture
 	/// </summary>
-	public class ReadOnlyIndexTexture : IIndexTexture
+	public sealed class ReadOnlyIndexTexture : IIndexTexture
 	{
 		private readonly byte[] _data;
 

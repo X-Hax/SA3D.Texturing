@@ -83,7 +83,7 @@ namespace SA3D.Texturing
 
 				if(texture is IndexTexture indexTex)
 				{
-					
+
 					indexTex.WriteIndexImageToFile(path, format, false);
 				}
 				else

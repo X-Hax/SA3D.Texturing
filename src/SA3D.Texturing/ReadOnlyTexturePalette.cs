@@ -5,7 +5,7 @@ namespace SA3D.Texturing
 	/// <summary>
 	/// Readonly texture palette
 	/// </summary>
-	public class ReadOnlyTexturePalette : ITexturePalette
+	public sealed class ReadOnlyTexturePalette : ITexturePalette
 	{
 		private readonly byte[] _colorData;
 
