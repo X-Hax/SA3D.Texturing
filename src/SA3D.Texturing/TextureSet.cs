@@ -88,7 +88,7 @@ namespace SA3D.Texturing
 				}
 				else
 				{
-					texture.WriteColorImageToFile(path, format);
+					texture.WriteImageToFile(path, format);
 				}
 			}
 		}

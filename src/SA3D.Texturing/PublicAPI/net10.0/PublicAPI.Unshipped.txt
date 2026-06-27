@@ -119,21 +119,21 @@ static SA3D.Texturing.ImageSharpExtensions.ToImageSharp(this SA3D.Texturing.ITex
 static SA3D.Texturing.ImageSharpExtensions.ToIndexedImageSharp(this SA3D.Texturing.IIndexTexture! texture) -> SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.A8>!
 static SA3D.Texturing.ImageSharpExtensions.ToPalette(this SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>! image) -> SA3D.Texturing.ITexturePalette!
 static SA3D.Texturing.ImageSharpExtensions.ToTexture(this SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>! image) -> SA3D.Texturing.ITexture!
-static SA3D.Texturing.TextureFileUtilities.CheckCanReadIndexed(byte[]! data, out bool index4, out bool storedInAlpha) -> bool
-static SA3D.Texturing.TextureFileUtilities.CheckCanReadIndexed(System.IO.Stream! stream, out bool index4, out bool storedInAlpha) -> bool
-static SA3D.Texturing.TextureFileUtilities.CheckCanReadIndexedFromFile(string! filepath, out bool index4, out bool storedInAlpha) -> bool
+static SA3D.Texturing.TextureFileUtilities.CheckCanReadIndexImage(System.IO.Stream! stream, out bool index4, out bool storedInAlpha) -> bool
+static SA3D.Texturing.TextureFileUtilities.CheckCanReadIndexImageFromBytes(byte[]! data, out bool index4, out bool storedInAlpha) -> bool
+static SA3D.Texturing.TextureFileUtilities.CheckCanReadIndexImageFromFile(string! filepath, out bool index4, out bool storedInAlpha) -> bool
 static SA3D.Texturing.TextureFileUtilities.ReadImage(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.Texture!
 static SA3D.Texturing.TextureFileUtilities.ReadImageFromBytes(byte[]! data, string! filename) -> SA3D.Texturing.Texture!
 static SA3D.Texturing.TextureFileUtilities.ReadImageFromFile(string! filepath) -> SA3D.Texturing.Texture!
-static SA3D.Texturing.TextureFileUtilities.ReadIndexed(byte[]! data, string! filename) -> SA3D.Texturing.IndexTexture!
-static SA3D.Texturing.TextureFileUtilities.ReadIndexed(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.IndexTexture!
-static SA3D.Texturing.TextureFileUtilities.ReadIndexedFromFile(string! filepath) -> SA3D.Texturing.IndexTexture!
-static SA3D.Texturing.TextureFileUtilities.TryReadIndexed(byte[]! data, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
-static SA3D.Texturing.TextureFileUtilities.TryReadIndexed(System.IO.Stream! stream, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
+static SA3D.Texturing.TextureFileUtilities.ReadIndexImage(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.IndexTexture!
+static SA3D.Texturing.TextureFileUtilities.ReadIndexImageFromBytes(byte[]! data, string! filename) -> SA3D.Texturing.IndexTexture!
+static SA3D.Texturing.TextureFileUtilities.ReadIndexImageFromFile(string! filepath) -> SA3D.Texturing.IndexTexture!
 static SA3D.Texturing.TextureFileUtilities.TryReadIndexedFromFile(string! filepath, out SA3D.Texturing.IndexTexture! result) -> bool
-static SA3D.Texturing.TextureFileUtilities.WriteColorImageToBytes(this SA3D.Texturing.ITexture! texture, SA3D.Texturing.ImageFormat format) -> byte[]!
-static SA3D.Texturing.TextureFileUtilities.WriteColorImageToFile(this SA3D.Texturing.ITexture! texture, string! filepath, SA3D.Texturing.ImageFormat format) -> void
+static SA3D.Texturing.TextureFileUtilities.TryReadIndexImage(System.IO.Stream! stream, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
+static SA3D.Texturing.TextureFileUtilities.TryReadIndexImageFromBytes(byte[]! data, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
 static SA3D.Texturing.TextureFileUtilities.WriteImage(this SA3D.Texturing.ITexture! texture, System.IO.Stream! stream, SA3D.Texturing.ImageFormat format) -> void
+static SA3D.Texturing.TextureFileUtilities.WriteImageToBytes(this SA3D.Texturing.ITexture! texture, SA3D.Texturing.ImageFormat format) -> byte[]!
+static SA3D.Texturing.TextureFileUtilities.WriteImageToFile(this SA3D.Texturing.ITexture! texture, string! filepath, SA3D.Texturing.ImageFormat format) -> void
 static SA3D.Texturing.TextureFileUtilities.WriteIndexImage(this SA3D.Texturing.IIndexTexture! texture, System.IO.Stream! stream, SA3D.Texturing.ImageFormat format, bool storeInAlpha) -> void
 static SA3D.Texturing.TextureFileUtilities.WriteIndexImageToBytes(this SA3D.Texturing.IIndexTexture! texture, SA3D.Texturing.ImageFormat format, bool storeInAlpha) -> byte[]!
 static SA3D.Texturing.TextureFileUtilities.WriteIndexImageToFile(this SA3D.Texturing.IIndexTexture! texture, string! filepath, SA3D.Texturing.ImageFormat format, bool storeInAlpha) -> void
