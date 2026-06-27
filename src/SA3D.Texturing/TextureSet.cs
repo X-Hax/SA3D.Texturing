@@ -12,13 +12,13 @@ namespace SA3D.Texturing
 		/// <summary>
 		/// Textures in the texture set
 		/// </summary>
-		public ReadOnlyCollection<Texture> Textures { get; }
+		public ReadOnlyCollection<ITexture> Textures { get; }
 
 		/// <summary>
 		/// Creates a new texture set.
 		/// </summary>
 		/// <param name="textures"></param>
-		public TextureSet(Texture[] textures)
+		public TextureSet(ITexture[] textures)
 		{
 			Textures = new(textures);
 		}
@@ -31,7 +31,7 @@ namespace SA3D.Texturing
 		/// <param name="nameSuffix">Suffix for every texture name.</param>
 		public void WriteContentIndex(TextWriter writer, string nameSuffix)
 		{
-			foreach(Texture texture in Textures)
+			foreach(ITexture texture in Textures)
 			{
 				writer.WriteLine($"{texture.GlobalIndex},{texture.Name}{nameSuffix},{texture.OverrideWidth}x{texture.OverrideHeight}");
 			}
@@ -42,7 +42,7 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="nameSuffix">Suffix for every texture name.</param>
 		/// <returns>The index contents.</returns>
-		public string WriteContentIndexToText(string nameSuffix)
+		public string WriteContentIndexToString(string nameSuffix)
 		{
 			using(StringWriter writer = new())
 			{
@@ -77,12 +77,13 @@ namespace SA3D.Texturing
 			string indexPath = Path.Join(outDirectory, "index.txt");
 			WriteContentIndexToFile(indexPath, extension);
 
-			foreach(Texture texture in Textures)
+			foreach(ITexture texture in Textures)
 			{
 				string path = Path.Join(outDirectory, texture.Name + extension);
 
 				if(texture is IndexTexture indexTex)
 				{
+					
 					indexTex.WriteIndexImageToFile(path, format, false);
 				}
 				else
@@ -99,7 +100,7 @@ namespace SA3D.Texturing
 		/// <returns>The imported texture set.</returns>
 		public static TextureSet ImportTexturePack(string directory)
 		{
-			List<Texture> textures = [];
+			List<ITexture> textures = [];
 
 			string indexPath = Path.Join(directory, "index.txt");
 			string[] index = File.ReadAllLines(indexPath);
@@ -110,7 +111,7 @@ namespace SA3D.Texturing
 				string filename = values[1];
 
 				string texturePath = Path.Join(directory, filename);
-				Texture texture = Texture.ReadTextureFromFile(texturePath);
+				Texture texture = TextureFileUtilities.ReadImageFromFile(texturePath);
 
 				texture.GlobalIndex = uint.Parse(values[0]);
 				if(values.Length >= 3)

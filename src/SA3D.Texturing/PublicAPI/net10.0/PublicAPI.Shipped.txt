@@ -1,25 +1,10 @@
 ﻿#nullable enable
-abstract SA3D.Texturing.Texture.CalculateExpectedDataLength(int width, int height) -> int
-abstract SA3D.Texturing.Texture.GetColorPixels() -> System.ReadOnlySpan<byte>
-override SA3D.Texturing.ColorTexture.GetColorPixels() -> System.ReadOnlySpan<byte>
-override SA3D.Texturing.IndexTexture.CheckIsTransparent() -> bool
-override SA3D.Texturing.IndexTexture.GetColorPixels() -> System.ReadOnlySpan<byte>
 override SA3D.Texturing.Texname.TextureName.ToString() -> string!
-override SA3D.Texturing.Texture.ToString() -> string!
-SA3D.Texturing.ColorTexture
-SA3D.Texturing.ColorTexture.ColorTexture(int width, int height, byte[]! data) -> void
-SA3D.Texturing.ColorTexture.ColorTexture(int width, int height, byte[]! data, string! name) -> void
-SA3D.Texturing.ColorTexture.ColorTexture(int width, int height, byte[]! data, string! name, uint globalIndex) -> void
-SA3D.Texturing.ColorTexture.ColorTexture(int width, int height, byte[]! data, uint globalIndex) -> void
 SA3D.Texturing.ImageSharpExtensions
 SA3D.Texturing.IndexTexture
 SA3D.Texturing.IndexTexture.IndexTexture(int width, int height, byte[]! data) -> void
-SA3D.Texturing.IndexTexture.IndexTexture(int width, int height, byte[]! data, string! name) -> void
-SA3D.Texturing.IndexTexture.IndexTexture(int width, int height, byte[]! data, string! name, uint globalIndex) -> void
-SA3D.Texturing.IndexTexture.IndexTexture(int width, int height, byte[]! data, uint globalIndex) -> void
 SA3D.Texturing.IndexTexture.IsIndex4.get -> bool
 SA3D.Texturing.IndexTexture.IsIndex4.set -> void
-SA3D.Texturing.IndexTexture.Palette.get -> SA3D.Texturing.TexturePalette?
 SA3D.Texturing.IndexTexture.Palette.set -> void
 SA3D.Texturing.IndexTexture.PaletteRow.get -> int
 SA3D.Texturing.IndexTexture.PaletteRow.set -> void
@@ -48,10 +33,7 @@ SA3D.Texturing.Texture.OverrideHeight.get -> int
 SA3D.Texturing.Texture.OverrideHeight.set -> void
 SA3D.Texturing.Texture.OverrideWidth.get -> int
 SA3D.Texturing.Texture.OverrideWidth.set -> void
-SA3D.Texturing.Texture.ProcessedHeight.get -> int
-SA3D.Texturing.Texture.ProcessedWidth.get -> int
 SA3D.Texturing.Texture.ReplaceData(int width, int height, byte[]! data) -> void
-SA3D.Texturing.Texture.Texture(int width, int height, byte[]! data, string! name, uint globalIndex) -> void
 SA3D.Texturing.Texture.Width.get -> int
 SA3D.Texturing.TexturePalette
 SA3D.Texturing.TexturePalette.ColorData.get -> System.ReadOnlySpan<byte>
@@ -61,37 +43,10 @@ SA3D.Texturing.TexturePalette.TexturePalette(byte[]! colorData) -> void
 SA3D.Texturing.TexturePalette.TexturePalette(string! name, byte[]! colorData) -> void
 SA3D.Texturing.TexturePalette.Width.get -> int
 SA3D.Texturing.TextureSet
-SA3D.Texturing.TextureSet.Textures.get -> System.Collections.ObjectModel.ReadOnlyCollection<SA3D.Texturing.Texture!>!
-SA3D.Texturing.TextureSet.TextureSet(SA3D.Texturing.Texture![]! textures) -> void
 SA3D.Texturing.TextureSet.WriteContentIndex(System.IO.TextWriter! writer, string! nameSuffix) -> void
 SA3D.Texturing.TextureSet.WriteContentIndexToFile(string! filepath, string! nameSuffix) -> void
-SA3D.Texturing.TextureSet.WriteContentIndexToText(string! nameSuffix) -> string!
 SA3D.Texturing.TextureUtilities
-static SA3D.Texturing.ImageSharpExtensions.CreatePaletteQuantizer(this SA3D.Texturing.TexturePalette! palette, int width, int offset, bool dither) -> SixLabors.ImageSharp.Processing.Processors.Quantization.PaletteQuantizer!
-static SA3D.Texturing.ImageSharpExtensions.ToImageSharp(this SA3D.Texturing.Texture! texture) -> SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>!
-static SA3D.Texturing.ImageSharpExtensions.ToImageSharp(this SA3D.Texturing.TexturePalette! palette, int? rowWidth = null) -> SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>!
-static SA3D.Texturing.ImageSharpExtensions.ToIndexedImageSharp(this SA3D.Texturing.IndexTexture! texture) -> SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.A8>!
-static SA3D.Texturing.ImageSharpExtensions.ToPalette(this SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>! image) -> SA3D.Texturing.TexturePalette!
-static SA3D.Texturing.ImageSharpExtensions.ToTexture(this SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32>! image) -> SA3D.Texturing.ColorTexture!
-static SA3D.Texturing.IndexTexture.CheckCanReadIndexed(byte[]! data, out bool index4, out bool storedInAlpha) -> bool
-static SA3D.Texturing.IndexTexture.CheckCanReadIndexed(System.IO.Stream! stream, out bool index4, out bool storedInAlpha) -> bool
-static SA3D.Texturing.IndexTexture.CheckCanReadIndexedFromFile(string! filepath, out bool index4, out bool storedInAlpha) -> bool
-static SA3D.Texturing.IndexTexture.ReadIndexed(byte[]! data, string! filename) -> SA3D.Texturing.IndexTexture!
-static SA3D.Texturing.IndexTexture.ReadIndexed(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.IndexTexture!
-static SA3D.Texturing.IndexTexture.ReadIndexedFromFile(string! filepath) -> SA3D.Texturing.IndexTexture!
-static SA3D.Texturing.IndexTexture.TryReadIndexed(byte[]! data, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
-static SA3D.Texturing.IndexTexture.TryReadIndexed(System.IO.Stream! stream, string! filename, out SA3D.Texturing.IndexTexture! result) -> bool
-static SA3D.Texturing.IndexTexture.TryReadIndexedFromFile(string! filepath, out SA3D.Texturing.IndexTexture! result) -> bool
 static SA3D.Texturing.Texname.TextureNameList.ReadFromTextFile(string! filepath) -> SA3D.Texturing.Texname.TextureNameList!
-static SA3D.Texturing.Texture.ReadTexture(byte[]! data, string! filename) -> SA3D.Texturing.Texture!
-static SA3D.Texturing.Texture.ReadTexture(System.IO.Stream! stream, string! filename) -> SA3D.Texturing.Texture!
-static SA3D.Texturing.Texture.ReadTextureFromFile(string! filepath) -> SA3D.Texturing.Texture!
-static SA3D.Texturing.TexturePalette.GetDefaultPalette(bool index4) -> SA3D.Texturing.TexturePalette!
-static SA3D.Texturing.TexturePalette.Index4Palette.get -> SA3D.Texturing.TexturePalette!
-static SA3D.Texturing.TexturePalette.Index8Palette.get -> SA3D.Texturing.TexturePalette!
 static SA3D.Texturing.TextureSet.ImportTexturePack(string! directory) -> SA3D.Texturing.TextureSet!
 static SA3D.Texturing.TextureUtilities.GetLuminance(byte red, byte green, byte blue) -> byte
 static SA3D.Texturing.TextureUtilities.GetLuminance(System.ReadOnlySpan<byte> color) -> byte
-static SA3D.Texturing.TextureUtilities.Palettize(this SA3D.Texturing.ColorTexture! texture, bool index4, bool dither) -> SA3D.Texturing.IndexTexture!
-static SA3D.Texturing.TextureUtilities.SortByLuminance(this SA3D.Texturing.TexturePalette! palette) -> SA3D.Texturing.TexturePalette!
-static SA3D.Texturing.TextureUtilities.TryGenerateExactPalette(this SA3D.Texturing.ColorTexture! texture, bool index4, out SA3D.Texturing.TexturePalette! palette) -> bool

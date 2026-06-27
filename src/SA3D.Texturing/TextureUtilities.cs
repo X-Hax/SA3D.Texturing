@@ -40,7 +40,7 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="palette">The palette to sort the colors of.</param>
 		/// <returns>A new palette with the sorted colors.</returns>
-		public static TexturePalette SortByLuminance(this TexturePalette palette)
+		public static TexturePalette SortByLuminance(this ITexturePalette palette)
 		{
 			(int, byte)[] luminanceLUT = new (int, byte)[palette.Width];
 			ReadOnlySpan<byte> data = palette.ColorData;
@@ -61,7 +61,7 @@ namespace SA3D.Texturing
 				data.Slice(luminanceLUT[i].Item1 * 4, 4).CopyTo(destination[(i * 4)..]);
 			}
 
-			return new(newPalette);
+			return new TexturePalette(newPalette);
 		}
 
 		/// <summary>
@@ -71,11 +71,11 @@ namespace SA3D.Texturing
 		/// <param name="index4">Whether to use 4 bit indices instead of 8.</param>
 		/// <param name="palette">The generated palette.</param>
 		/// <returns>Whether the palette was successfully generated. If false, the texture has more colors than the palette can hold.</returns>
-		public static bool TryGenerateExactPalette(this ColorTexture texture, bool index4, [MaybeNullWhen(false)] out TexturePalette palette)
+		public static bool TryGenerateExactPalette(this ITexture texture, bool index4, [MaybeNullWhen(false)] out TexturePalette palette)
 		{
 			palette = null;
 
-			ReadOnlySpan<byte> pixels = texture.GetColorPixels();
+			ReadOnlySpan<byte> pixels = texture.GetPixelData();
 
 			byte[] palleteColors = new byte[index4 ? 64 : 1024];
 			Span<byte> destination = palleteColors;
@@ -119,7 +119,7 @@ namespace SA3D.Texturing
 		/// <param name="index4">Whether to use 4 bit indices instead of 8.</param>
 		/// <param name="dither">Whether to utilize dithering.</param>
 		/// <returns>The index texture with the palette.</returns>
-		public static IndexTexture Palettize(this ColorTexture texture, bool index4, bool dither)
+		public static IndexTexture Palettize(this ITexture texture, bool index4, bool dither)
 		{
 			Image<Rgba32> image = texture.ToImageSharp();
 			IndexedImageFrame<Rgba32> frame;
@@ -141,7 +141,7 @@ namespace SA3D.Texturing
 				IQuantizer<Rgba32> wuQuantizer = new WuQuantizer(quantizerOptions).CreatePixelSpecificQuantizer<Rgba32>(Configuration.Default);
 				frame = wuQuantizer.BuildPaletteAndQuantizeFrame(image.Frames.RootFrame, new Rectangle(0, 0, image.Width, image.Height));
 				byte[] generatedPalette = MemoryMarshal.Cast<Rgba32, byte>(wuQuantizer.Palette.Span).ToArray();
-				palette = new TexturePalette(generatedPalette).SortByLuminance();
+				palette = new ReadOnlyTexturePalette(generatedPalette).SortByLuminance();
 			}
 
 			byte[] indexData = new byte[frame.Width * frame.Height];
@@ -152,8 +152,10 @@ namespace SA3D.Texturing
 				frame.DangerousGetRowSpan(y).CopyTo(destination[(y * frame.Width)..]);
 			}
 
-			return new(texture.Width, texture.Height, indexData, texture.Name, texture.GlobalIndex)
+			return new IndexTexture(texture.Width, texture.Height, indexData)
 			{
+				Name = texture.Name,
+				GlobalIndex = texture.GlobalIndex,
 				IsIndex4 = index4,
 				Palette = palette
 			};

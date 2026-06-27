@@ -15,9 +15,9 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="texture">The texture to convert.</param>
 		/// <returns>The converted image.</returns>
-		public static Image<Rgba32> ToImageSharp(this Texture texture)
+		public static Image<Rgba32> ToImageSharp(this ITexture texture)
 		{
-			return Image.LoadPixelData<Rgba32>(texture.GetColorPixels(), texture.Width, texture.Height);
+			return Image.LoadPixelData<Rgba32>(texture.GetPixelData(), texture.Width, texture.Height);
 		}
 
 		/// <summary>
@@ -27,7 +27,7 @@ namespace SA3D.Texturing
 		/// <param name="rowWidth">Number of pixels a single row should occupy.</param>
 		/// <returns>The converted image.</returns>
 		/// <exception cref="ArgumentException"></exception>
-		public static Image<Rgba32> ToImageSharp(this TexturePalette palette, int? rowWidth = null)
+		public static Image<Rgba32> ToImageSharp(this ITexturePalette palette, int? rowWidth = null)
 		{
 			if(rowWidth == null)
 			{
@@ -46,9 +46,9 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="texture">The texture to convert.</param>
 		/// <returns>The converted image.</returns>
-		public static Image<A8> ToIndexedImageSharp(this IndexTexture texture)
+		public static Image<A8> ToIndexedImageSharp(this IIndexTexture texture)
 		{
-			return Image.LoadPixelData<A8>(texture.Data, texture.Width, texture.Height);
+			return Image.LoadPixelData<A8>(texture.GetIndexPixelData(), texture.Width, texture.Height);
 		}
 
 		/// <summary>
@@ -56,11 +56,11 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="image">The image to convert.</param>
 		/// <returns>The converted texture.</returns>
-		public static ColorTexture ToTexture(this Image<Rgba32> image)
+		public static ITexture ToTexture(this Image<Rgba32> image)
 		{
 			byte[] data = new byte[image.Width * image.Height * 4];
 			image.CopyPixelDataTo(new Span<byte>(data));
-			return new ColorTexture(image.Width, image.Height, data);
+			return new ReadOnlyTexture(image.Width, image.Height, data);
 		}
 
 		/// <summary>
@@ -68,11 +68,11 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="image">The image to convert.</param>
 		/// <returns>The converted palette.</returns>
-		public static TexturePalette ToPalette(this Image<Rgba32> image)
+		public static ITexturePalette ToPalette(this Image<Rgba32> image)
 		{
 			byte[] data = new byte[image.Width * image.Height * 4];
 			image.CopyPixelDataTo(new Span<byte>(data));
-			return new TexturePalette(data);
+			return new ReadOnlyTexturePalette(data);
 		}
 
 		/// <summary>
@@ -83,7 +83,7 @@ namespace SA3D.Texturing
 		/// <param name="offset">The offset at which to start using colors from the palette.</param>
 		/// <param name="dither">Whether to allow dithering when quantizing.</param>
 		/// <returns>The quantizer.</returns>
-		public static PaletteQuantizer CreatePaletteQuantizer(this TexturePalette palette, int width, int offset, bool dither)
+		public static PaletteQuantizer CreatePaletteQuantizer(this ITexturePalette palette, int width, int offset, bool dither)
 		{
 			Color[] paletteColors = new Color[width];
 			ReadOnlySpan<byte> colorData = palette.ColorData;

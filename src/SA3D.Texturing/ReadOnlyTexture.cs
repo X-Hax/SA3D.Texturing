@@ -4,32 +4,29 @@ using System.IO;
 namespace SA3D.Texturing
 {
 	/// <summary>
-	/// RGBA32 texture.
+	/// Readonly RGBA32 color texture
 	/// </summary>
-	public sealed class Texture : ITexture
+	public sealed class ReadOnlyTexture : ITexture
 	{
-		/// <summary>
-		/// RGBA32 pixel data
-		/// </summary>
-		public byte[] Data { get; private set; }
+		private readonly byte[] _data;
 
 		/// <inheritdoc/>
-		public string Name { get; set; }
+		public string Name { get; init; }
 
 		/// <inheritdoc/>
-		public uint GlobalIndex { get; set; }
+		public uint GlobalIndex { get; init; }
 
 		/// <inheritdoc/>
-		public int Width { get; private set; }
+		public int Width { get; }
 
 		/// <inheritdoc/>
-		public int Height { get; private set;}
+		public int Height { get; }
 
 		/// <inheritdoc/>
-		public int OverrideWidth { get; set; }
+		public int OverrideWidth { get; init; }
 
 		/// <inheritdoc/>
-		public int OverrideHeight { get; set; }
+		public int OverrideHeight { get; init; }
 
 
 		/// <summary>
@@ -39,7 +36,7 @@ namespace SA3D.Texturing
 		/// <param name="height">Height of the texture in pixels.</param>
 		/// <param name="data">Raw pixel data to use.</param>
 		/// <exception cref="InvalidDataException"></exception>
-		public Texture(int width, int height, byte[] data)
+		public ReadOnlyTexture(int width, int height, byte[] data)
 		{
 			if(width < 1 || height < 1)
 			{
@@ -52,7 +49,7 @@ namespace SA3D.Texturing
 				throw new InvalidDataException($"Data length does not match expectations! Is: {data.Length}, should be: {expectedDataLength}");
 			}
 
-			Data = data;
+			_data = data;
 			Width = width;
 			Height = height;
 			Name = string.Empty;
@@ -62,7 +59,7 @@ namespace SA3D.Texturing
 		/// Creates a new texture from another texture
 		/// </summary>
 		/// <param name="texture"></param>
-		public Texture(ITexture texture) : this(texture.Width, texture.Height, texture.GetPixelData().ToArray())
+		public ReadOnlyTexture(ITexture texture) : this(texture.Width, texture.Height, texture.GetPixelData().ToArray())
 		{
 			Name = texture.Name;
 			GlobalIndex = texture.GlobalIndex;
@@ -71,36 +68,16 @@ namespace SA3D.Texturing
 		}
 
 
-		/// <summary>
-		/// Replaces texture dimensions and raw data.
-		/// </summary>
-		/// <param name="width">New texture width in pixels.</param>
-		/// <param name="height">New texture height in pixels.</param>
-		/// <param name="data">New raw texture data.</param>
-		/// <exception cref="InvalidDataException"></exception>
-		public void ReplaceData(int width, int height, byte[] data)
-		{
-			int expectedDataLength = width * height * 4;
-			if(data.Length != expectedDataLength)
-			{
-				throw new InvalidDataException($"Data length does not match expectations! Is: {data.Length}, should be: {expectedDataLength}");
-			}
-
-			Width = width;
-			Height = height;
-			Data = data;
-		}
-
 		/// <inheritdoc/>
 		public ReadOnlySpan<byte> GetPixelData()
 		{
-			return Data;
+			return _data;
 		}
 
 		/// <inheritdoc/>
 		public override string ToString()
 		{
-			return $"\"{Name}\": {Width}x{Height}, ({((ITexture)this).RealWidth}x{((ITexture)this).RealWidth}) {GlobalIndex}";
+			return $"[RO] \"{Name}\": {Width}x{Height}, ({((ITexture)this).RealWidth}x{((ITexture)this).RealWidth}) {GlobalIndex}";
 		}
 	}
 }
