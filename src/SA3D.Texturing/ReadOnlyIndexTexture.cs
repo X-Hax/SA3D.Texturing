@@ -30,10 +30,10 @@ namespace SA3D.Texturing
 
 
 		/// <inheritdoc/>
-		public ITexturePalette? Palette { get; init; }
+		public ITexturePalette? Palette { get; set; }
 
 		/// <inheritdoc/>
-		public int PaletteRow { get; init; }
+		public int PaletteRow { get; set; }
 
 		/// <inheritdoc/>
 		public bool IsIndex4 { get; init; }

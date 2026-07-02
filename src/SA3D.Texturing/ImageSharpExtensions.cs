@@ -1,6 +1,5 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using System;
 
 namespace SA3D.Texturing
@@ -73,34 +72,6 @@ namespace SA3D.Texturing
 			byte[] data = new byte[image.Width * image.Height * 4];
 			image.CopyPixelDataTo(new Span<byte>(data));
 			return new ReadOnlyTexturePalette(data);
-		}
-
-		/// <summary>
-		/// Creates a palette quantizer that can be used to convert a color image to an indexed image.
-		/// </summary>
-		/// <param name="palette">The palette to match the colors against.</param>
-		/// <param name="width">The number of colors from the palette to use.</param>
-		/// <param name="offset">The offset at which to start using colors from the palette.</param>
-		/// <param name="dither">Whether to allow dithering when quantizing.</param>
-		/// <returns>The quantizer.</returns>
-		public static PaletteQuantizer CreatePaletteQuantizer(this ITexturePalette palette, int width, int offset, bool dither)
-		{
-			Color[] paletteColors = new Color[width];
-			ReadOnlySpan<byte> colorData = palette.GetColorData();
-
-			for(int i = 0; i < width; i++)
-			{
-				ReadOnlySpan<byte> color = colorData.Slice((offset + i) * 4, 4);
-				paletteColors[i] = new Rgba32(color[0], color[1], color[2], color[3]);
-			}
-
-			return new PaletteQuantizer(
-				new(paletteColors),
-				new QuantizerOptions()
-				{
-					MaxColors = width,
-					Dither = dither ? QuantizerConstants.DefaultDither : null,
-				});
 		}
 	}
 }

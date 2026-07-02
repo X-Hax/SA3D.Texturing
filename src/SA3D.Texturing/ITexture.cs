@@ -60,17 +60,8 @@ namespace SA3D.Texturing
 		/// <returns>Whether any pixel is has an alpha value below 255</returns>
 		public bool CheckIsTransparent()
 		{
-			ReadOnlySpan<byte> colorData = GetPixelData();
-
-			for(int i = 3; i < colorData.Length; i += 4)
-			{
-				if(colorData[i] < 0xFF)
-				{
-					return true;
-				}
-			}
-
-			return false;
+			return TextureUtilities.CheckIsTextureTransparent(GetPixelData());
 		}
+
 	}
 }
