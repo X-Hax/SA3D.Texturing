@@ -112,19 +112,16 @@ namespace SA3D.Texturing
 		}
 
 		/// <summary>
-		/// Converts a color texture to an index texture with a palette.
+		/// Genrates
 		/// </summary>
-		/// <param name="data">RGBA32 image data</param>
+		/// <param name="data">The image data to generate a palette for</param>
 		/// <param name="width">Image width</param>
-		/// <param name="height">Image width</param>
-		/// <param name="index4">Whether to use 4 bit indices instead of 8.</param>
-		/// <param name="dither">Whether to utilize dithering.</param>
-		/// <param name="indexData">Resulting index image data</param>
-		/// <param name="paletteColors">Resulting palette colors</param>
-		/// <returns>The index texture with the palette.</returns>
-		public static void Palettize(ReadOnlySpan<byte> data, int width, int height, bool index4, bool dither, out byte[] indexData, out byte[] paletteColors)
+		/// <param name="height">Image height</param>
+		/// <param name="index4">Whether the target index texture uses 4 bit indices, instead of 8</param>
+		/// <param name="dither">Whether the palette is to be used with dithering</param>
+		/// <returns></returns>
+		public static byte[] GeneratePaletteForTexture(ReadOnlySpan<byte> data, int width, int height, bool index4, bool dither)
 		{
-			Image<Rgba32> image = Image.LoadPixelData<Rgba32>(data, width, height);
 			ReadOnlySpan<byte> rawPalette;
 
 			if(TryGenerateExactPalette(data, index4, out byte[]? exactPaletteColors))
@@ -140,13 +137,32 @@ namespace SA3D.Texturing
 				};
 
 				IQuantizer<Rgba32> wuQuantizer = new WuQuantizer(quantizerOptions).CreatePixelSpecificQuantizer<Rgba32>(Configuration.Default);
+				Image<Rgba32> image = Image.LoadPixelData<Rgba32>(data, width, height);
 				wuQuantizer.BuildPalette(new ExtensivePixelSamplingStrategy(), image);
 				rawPalette = MemoryMarshal.Cast<Rgba32, byte>(wuQuantizer.Palette.Span);
 			}
 
-			paletteColors = SortColorDataByLuminance(rawPalette, out _);
+			return SortColorDataByLuminance(rawPalette, out _);
+		}
 
-			IQuantizer<Rgba32> quantizer = 
+		/// <summary>
+		/// Converts a color texture to an index texture with a palette.
+		/// </summary>
+		/// <param name="data">RGBA32 image data</param>
+		/// <param name="width">Image width</param>
+		/// <param name="height">Image width</param>
+		/// <param name="index4">Whether to use 4 bit indices instead of 8.</param>
+		/// <param name="dither">Whether to utilize dithering.</param>
+		/// <param name="indexData">Resulting index image data</param>
+		/// <param name="paletteColors">Resulting palette colors</param>
+		/// <returns>The index texture with the palette.</returns>
+		public static void PalettizeTexture(ReadOnlySpan<byte> data, int width, int height, bool index4, bool dither, out byte[] indexData, out byte[] paletteColors)
+		{
+			paletteColors = GeneratePaletteForTexture(data, width, height, index4, dither);
+
+			Image<Rgba32> image = Image.LoadPixelData<Rgba32>(data, width, height);
+
+			IQuantizer<Rgba32> quantizer =
 				CreatePaletteQuantizer(paletteColors, dither)
 				.CreatePixelSpecificQuantizer<Rgba32>(Configuration.Default);
 
