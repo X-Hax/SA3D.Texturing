@@ -4,6 +4,7 @@ using BCnEncoder.Encoder;
 using BCnEncoder.ImageSharp;
 using BCnEncoder.Shared;
 using BCnEncoder.Shared.ImageFiles;
+using SA3D.Texturing.ReadOnly;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Bmp;
@@ -20,7 +21,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace SA3D.Texturing
+namespace SA3D.Texturing.IO
 {
 	/// <summary>
 	/// Texture file utilities
@@ -36,7 +37,7 @@ namespace SA3D.Texturing
 		/// <exception cref="ArgumentException"></exception>
 		public static void WriteImage(this ITexture texture, Stream stream, ImageFormat format)
 		{
-			ReadOnlySpan<byte> colorData = texture.GetPixelData();
+			ReadOnlySpan<byte> colorData = texture.GetRGBA32Data();
 			bool isTransparent = texture.CheckIsTransparent();
 			IImageEncoder? encoder;
 
@@ -203,7 +204,7 @@ namespace SA3D.Texturing
 						PaletteRow = 0,
 					};
 
-					new BcEncoder(CompressionFormat.R).EncodeToDds(grayscaleTexture.GetPixelData(), texture.Width, texture.Height, PixelFormat.Rgba32).Write(stream);
+					new BcEncoder(CompressionFormat.R).EncodeToDds(grayscaleTexture.GetRGBA32Data(), texture.Width, texture.Height, PixelFormat.Rgba32).Write(stream);
 
 					return;
 				default:
@@ -277,7 +278,7 @@ namespace SA3D.Texturing
 			byte[] data = new byte[image.Width * image.Height * 4];
 			image.CopyPixelDataTo(data);
 
-			return new Texture(image.Width, image.Height, data)
+			return new Texture(data, image.Width, image.Height)
 			{
 				Name = filename
 			};
@@ -569,10 +570,9 @@ namespace SA3D.Texturing
 				image.CopyPixelDataTo(data);
 			}
 
-			return new IndexTexture(width, height, data)
+			return new IndexTexture(data, width, height, isIndex4)
 			{
-				Name = filename,
-				IsIndex4 = isIndex4
+				Name = filename
 			};
 		}
 

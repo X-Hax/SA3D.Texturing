@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp;
+﻿using SA3D.Texturing.ReadOnly;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 
@@ -16,7 +17,7 @@ namespace SA3D.Texturing
 		/// <returns>The converted image.</returns>
 		public static Image<Rgba32> ToImageSharp(this ITexture texture)
 		{
-			return Image.LoadPixelData<Rgba32>(texture.GetPixelData(), texture.Width, texture.Height);
+			return Image.LoadPixelData<Rgba32>(texture.GetRGBA32Data(), texture.Width, texture.Height);
 		}
 
 		/// <summary>
@@ -59,7 +60,7 @@ namespace SA3D.Texturing
 		{
 			byte[] data = new byte[image.Width * image.Height * 4];
 			image.CopyPixelDataTo(new Span<byte>(data));
-			return new ReadOnlyTexture(image.Width, image.Height, data);
+			return new ReadOnlyTexture(data, image.Width, image.Height);
 		}
 
 		/// <summary>

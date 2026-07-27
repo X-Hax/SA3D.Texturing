@@ -1,4 +1,4 @@
-﻿namespace SA3D.Texturing
+﻿namespace SA3D.Texturing.IO
 {
 	/// <summary>
 	/// Image formats

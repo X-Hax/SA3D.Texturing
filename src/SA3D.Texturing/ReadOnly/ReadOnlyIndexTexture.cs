@@ -1,35 +1,23 @@
 ﻿using SA3D.Texturing.MipMapping;
 using System;
 
-namespace SA3D.Texturing
+namespace SA3D.Texturing.ReadOnly
 {
 	/// <summary>
-	/// Texture consisting of single byte pixels that refer to a palette
+	/// Read-only index texture
 	/// </summary>
-	public sealed class IndexTexture : IIndexTexture, IMipMapped
+	public sealed class ReadOnlyIndexTexture : IIndexTexture, IMipMapped
 	{
 		/// <summary>
 		/// Texture data
 		/// </summary>
-		public MipMapSet TextureData
-		{
-			get;
-			set
-			{
-				if(value.TextureType is not TextureType.Index4 and not TextureType.Index8)
-				{
-					throw new ArgumentException("The texture-datas type is not an Index type!", nameof(value));
-				}
-
-				field = value;
-			}
-		}
+		public MipMapSet TextureData { get; }
 
 		/// <inheritdoc/>
-		public string Name { get; set; }
+		public string Name { get; init; }
 
 		/// <inheritdoc/>
-		public uint GlobalIndex { get; set; }
+		public uint GlobalIndex { get; init; }
 
 		/// <inheritdoc/>
 		public int Width => TextureData.BaseWidth;
@@ -38,10 +26,10 @@ namespace SA3D.Texturing
 		public int Height => TextureData.BaseHeight;
 
 		/// <inheritdoc/>
-		public int OverrideWidth { get; set; }
+		public int OverrideWidth { get; init; }
 
 		/// <inheritdoc/>
-		public int OverrideHeight { get; set; }
+		public int OverrideHeight { get; init; }
 
 
 		/// <inheritdoc/>
@@ -63,8 +51,13 @@ namespace SA3D.Texturing
 		/// Creates a new index texture off a mip map set
 		/// </summary>
 		/// <param name="textureData">Texture data to use</param>
-		public IndexTexture(MipMapSet textureData)
+		public ReadOnlyIndexTexture(MipMapSet textureData)
 		{
+			if(textureData.TextureType is not TextureType.Index4 and not TextureType.Index8)
+			{
+				throw new ArgumentException("The texture-datas type is not an Index type!", nameof(textureData));
+			}
+
 			Name = string.Empty;
 			TextureData = textureData;
 		}
@@ -77,7 +70,7 @@ namespace SA3D.Texturing
 		/// <param name="height">Height of the texture</param>
 		/// <param name="isIndex4">Whether the data uses 4 bit- instead of 8 bit indices</param>
 		/// <param name="generateMipMaps">Whether to generate mip maps</param>
-		public IndexTexture(ReadOnlySpan<byte> data, int width, int height, bool isIndex4, bool generateMipMaps = false)
+		public ReadOnlyIndexTexture(ReadOnlySpan<byte> data, int width, int height, bool isIndex4, bool generateMipMaps = false)
 			: this(MipMapSet.GenerateMipMaps(data, width, height, isIndex4 ? TextureType.Index4 : TextureType.Index8, isIndex4 ? TextureType.Index4 : TextureType.Index8, out _, !generateMipMaps)) { }
 
 		/// <summary>
@@ -86,7 +79,7 @@ namespace SA3D.Texturing
 		/// <param name="texture">Texture to use</param>
 		/// <param name="generateMipMaps">Whether to generate mip maps</param>
 		/// <returns></returns>
-		public IndexTexture(IIndexTexture texture, bool generateMipMaps = false)
+		public ReadOnlyIndexTexture(IIndexTexture texture, bool generateMipMaps = false)
 			: this(texture.GetIndexPixelData(), texture.Width, texture.Height, texture.IsIndex4, generateMipMaps)
 		{
 			OverrideWidth = texture.OverrideWidth;

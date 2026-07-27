@@ -1,17 +1,29 @@
-﻿using System;
-using System.IO;
+﻿using SA3D.Texturing.MipMapping;
+using System;
 
 namespace SA3D.Texturing
 {
 	/// <summary>
 	/// RGBA32 texture.
 	/// </summary>
-	public sealed class Texture : ITexture
+	public sealed class Texture : ITexture, IMipMapped
 	{
 		/// <summary>
-		/// RGBA32 pixel data
+		/// Texture data
 		/// </summary>
-		public byte[] Data { get; private set; }
+		public MipMapSet TextureData
+		{
+			get;
+			set
+			{
+				if(value.TextureType != TextureType.RGBA32)
+				{
+					throw new ArgumentException("The texture-datas type is not RGBA32!", nameof(value));
+				}
+
+				field = value;
+			}
+		}
 
 		/// <inheritdoc/>
 		public string Name { get; set; }
@@ -20,10 +32,10 @@ namespace SA3D.Texturing
 		public uint GlobalIndex { get; set; }
 
 		/// <inheritdoc/>
-		public int Width { get; private set; }
+		public int Width => TextureData.BaseWidth;
 
 		/// <inheritdoc/>
-		public int Height { get; private set;}
+		public int Height => TextureData.BaseHeight;
 
 		/// <inheritdoc/>
 		public int OverrideWidth { get; set; }
@@ -31,76 +43,80 @@ namespace SA3D.Texturing
 		/// <inheritdoc/>
 		public int OverrideHeight { get; set; }
 
+		/// <inheritdoc/>
+		public bool HasMipMaps => TextureData.LevelCount > 1;
+
+		IMipMapSet IMipMapped.MipMaps => TextureData;
+
 
 		/// <summary>
-		/// Creates a new texture from pixel data
+		/// Creates a new texture off a mip map set
 		/// </summary>
-		/// <param name="width">Width of the texture in pixels.</param>
-		/// <param name="height">Height of the texture in pixels.</param>
-		/// <param name="data">Raw pixel data to use.</param>
-		/// <exception cref="InvalidDataException"></exception>
-		public Texture(int width, int height, byte[] data)
+		/// <param name="textureData">Texture data to use</param>
+		public Texture(MipMapSet textureData)
 		{
-			if(width < 1 || height < 1)
-			{
-				throw new ArgumentException("Dimensions invalid! Width and height have to be at least 1!");
-			}
-
-			int expectedDataLength = width * height * 4;
-			if(data.Length != expectedDataLength)
-			{
-				throw new InvalidDataException($"Data length does not match expectations! Is: {data.Length}, should be: {expectedDataLength}");
-			}
-
-			Data = data;
-			Width = width;
-			Height = height;
 			Name = string.Empty;
+			TextureData = textureData;
 		}
 
 		/// <summary>
-		/// Creates a new texture from another texture
+		/// Creates a new texture off raw RGBA32 data
 		/// </summary>
-		/// <param name="texture"></param>
-		public Texture(ITexture texture) : this(texture.Width, texture.Height, texture.GetPixelData().ToArray())
+		/// <param name="data">The RGBA32 data to use</param>
+		/// <param name="width">Width of the texture</param>
+		/// <param name="height">Height of the texture</param>
+		/// <param name="generateMipMaps">Whether to generate mip maps</param>
+		public Texture(ReadOnlySpan<byte> data, int width, int height, bool generateMipMaps = false)
+			: this(MipMapSet.GenerateMipMaps(data, width, height, TextureType.RGBA32, TextureType.RGBA32, out _, !generateMipMaps)) { }
+
+		/// <summary>
+		/// Creates a new texture off another texture
+		/// </summary>
+		/// <param name="texture">Texture to use</param>
+		/// <param name="generateMipMaps">Whether to generate mip maps</param>
+		/// <returns></returns>
+		public Texture(ITexture texture, bool generateMipMaps = false)
+			: this(texture.GetRGBA32Data(), texture.Width, texture.Height, generateMipMaps)
 		{
-			Name = texture.Name;
-			GlobalIndex = texture.GlobalIndex;
 			OverrideWidth = texture.OverrideWidth;
 			OverrideHeight = texture.OverrideHeight;
 		}
 
 
-		/// <summary>
-		/// Replaces texture dimensions and raw data.
-		/// </summary>
-		/// <param name="width">New texture width in pixels.</param>
-		/// <param name="height">New texture height in pixels.</param>
-		/// <param name="data">New raw texture data.</param>
-		/// <exception cref="InvalidDataException"></exception>
-		public void ReplaceData(int width, int height, byte[] data)
+		/// <inheritdoc/>
+		public ReadOnlySpan<byte> GetRGBA32Data(int mipMapLevel = 0)
 		{
-			int expectedDataLength = width * height * 4;
-			if(data.Length != expectedDataLength)
+			if(mipMapLevel > 0 && !HasMipMaps)
 			{
-				throw new InvalidDataException($"Data length does not match expectations! Is: {data.Length}, should be: {expectedDataLength}");
+				throw new ArgumentOutOfRangeException(nameof(mipMapLevel), $"Tried accessing mip map level {mipMapLevel}, but texture has no mip maps!");
+			}
+			else if(TextureData.LevelCount <= mipMapLevel)
+			{
+				throw new ArgumentOutOfRangeException(nameof(mipMapLevel), $"Tried accessing mip map level {mipMapLevel}, but texture only has mip maps available up to level {TextureData.LevelCount - 1}!");
 			}
 
-			Width = width;
-			Height = height;
-			Data = data;
+			return TextureData.MipMapLevels[mipMapLevel].Data;
 		}
 
 		/// <inheritdoc/>
-		public ReadOnlySpan<byte> GetPixelData()
+		public bool CheckIsTransparent()
 		{
-			return Data;
+			return TextureUtilities.CheckIsTextureTransparent(GetRGBA32Data());
 		}
+
 
 		/// <inheritdoc/>
 		public override string ToString()
 		{
-			return $"\"{Name}\": {Width}x{Height}, ({((ITexture)this).RealWidth}x{((ITexture)this).RealWidth}) {GlobalIndex}";
+			if(OverrideWidth == 0 && OverrideHeight == 0)
+			{
+				return $"\"{Name}\": {Width}x{Height}, {GlobalIndex}";
+			}
+			else
+			{
+				return $"\"{Name}\": {Width}x{Height}, ({this.RealWidth}x{this.RealWidth}) {GlobalIndex}";
+			}
 		}
+
 	}
 }

@@ -36,6 +36,30 @@ namespace SA3D.Texturing
 		}
 
 		/// <summary>
+		/// Converts 8 bit indices to 4 bit indices
+		/// </summary>
+		/// <param name="data"></param>
+		public static void ConvertIndex8To4(Span<byte> data)
+		{
+			for(int i = 0; i < data.Length; i++)
+			{
+				data[i] = (byte)((data[i] & 0xF) | (data[i] << 4));
+			}
+		}
+
+		/// <summary>
+		/// Converts 4 bit indices to 8 bit indices
+		/// </summary>
+		/// <param name="data"></param>
+		public static void ConvertIndex4To8(Span<byte> data)
+		{
+			for(int i = 0; i < data.Length; i++)
+			{
+				data[i] = (byte)(data[i] >> 4);
+			}
+		}
+
+		/// <summary>
 		/// Sorts the colors in a palette by luminance into a new palette.
 		/// </summary>
 		/// <param name="paletteColors">The palette to sort the colors of.</param>

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SA3D.Texturing
+namespace SA3D.Texturing.ReadOnly
 {
 	/// <summary>
 	/// Readonly texture palette

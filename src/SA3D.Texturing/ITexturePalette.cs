@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SA3D.Texturing.ReadOnly;
+using System;
 
 namespace SA3D.Texturing
 {
@@ -10,12 +11,12 @@ namespace SA3D.Texturing
 		/// <summary>
 		/// The default grayscale palette for rendering 8 bit index textures.
 		/// </summary>
-		public static ITexturePalette Index8Palette { get; }
+		public static ReadOnlyTexturePalette Index8Palette { get; }
 
 		/// <summary>
 		/// The default grayscale palette for rendering 4 bit index textures.
 		/// </summary>
-		public static ITexturePalette Index4Palette { get; }
+		public static ReadOnlyTexturePalette Index4Palette { get; }
 
 
 		/// <summary>
@@ -71,7 +72,7 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="index4">Specifies the default palette to get.</param>
 		/// <returns>The default palette.</returns>
-		public static ITexturePalette GetDefaultPalette(bool index4)
+		public static ReadOnlyTexturePalette GetDefaultPalette(bool index4)
 		{
 			return index4 ? Index4Palette : Index8Palette;
 		}

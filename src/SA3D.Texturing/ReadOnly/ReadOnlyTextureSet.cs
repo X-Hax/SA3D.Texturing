@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace SA3D.Texturing
+namespace SA3D.Texturing.ReadOnly
 {
 	/// <summary>
 	/// Read-only Texture set

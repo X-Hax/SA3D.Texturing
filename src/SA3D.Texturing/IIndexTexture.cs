@@ -23,21 +23,35 @@ namespace SA3D.Texturing
 		/// </summary>
 		public bool IsIndex4 { get; }
 
+		TextureType ITexture.TextureType => IsIndex4 ? TextureType.Index4 : TextureType.Index8;
+
+
 		/// <summary>
 		/// Returns the image index pixel data, where each pixel is 1 byte
-		/// </summary>
-		/// <returns>Index pixel data</returns>
-		public ReadOnlySpan<byte> GetIndexPixelData();
+		/// </summary>+
+		/// <param name="mipMapLevel">Mip map level of which to get the data</param>
+		public ReadOnlySpan<byte> GetIndexPixelData(int mipMapLevel = 0);
 
+		ReadOnlySpan<byte> ITexture.GetRGBA32Data(int mipmaplevel)
+		{
+			return TextureUtilities.ApplyPaletteToIndexTexture(this.GetUsedPaletteColors(), GetIndexPixelData(mipmaplevel), IsIndex4);
+		}
+	}
+
+	/// <summary>
+	/// Index texture extensions
+	/// </summary>
+	public static class IndexTextureExtensions
+	{
 		/// <summary>
 		/// Gets palette color data that will actually be used by the texture
 		/// </summary>
 		/// <returns></returns>
-		public ReadOnlySpan<byte> GetUsedPaletteColors()
+		public static ReadOnlySpan<byte> GetUsedPaletteColors(this IIndexTexture texture)
 		{
-			ReadOnlySpan<byte> colorData = (Palette ?? ITexturePalette.GetDefaultPalette(IsIndex4)).GetColorData();
-			int paletteSize = (IsIndex4 ? 16 : 256) * 4;
-			ReadOnlySpan<byte> result = colorData[(paletteSize * PaletteRow % colorData.Length)..];
+			ReadOnlySpan<byte> colorData = (texture.Palette ?? ITexturePalette.GetDefaultPalette(texture.IsIndex4)).GetColorData();
+			int paletteSize = (texture.IsIndex4 ? 16 : 256) * 4;
+			ReadOnlySpan<byte> result = colorData[(paletteSize * texture.PaletteRow % colorData.Length)..];
 
 			if(result.Length > paletteSize)
 			{
@@ -45,17 +59,6 @@ namespace SA3D.Texturing
 			}
 
 			return result;
-		}
-
-
-		bool ITexture.CheckIsTransparent()
-		{
-			return TextureUtilities.CheckIndexTextureUsesTransparency(GetUsedPaletteColors(), GetIndexPixelData(), IsIndex4);
-		}
-
-		ReadOnlySpan<byte> ITexture.GetPixelData()
-		{
-			return TextureUtilities.ApplyPaletteToIndexTexture(GetUsedPaletteColors(), GetIndexPixelData(), IsIndex4);
 		}
 	}
 }

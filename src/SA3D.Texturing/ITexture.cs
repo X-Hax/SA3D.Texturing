@@ -38,30 +38,45 @@ namespace SA3D.Texturing
 		public int OverrideHeight { get; }
 
 		/// <summary>
-		/// Returns <see cref="OverrideWidth"/> if it is > 0. Otherwise returns <see cref="Width"/>
+		/// Wether the texture has mip maps
 		/// </summary>
-		public int RealWidth => OverrideWidth == 0 ? Width : OverrideWidth;
+		public bool HasMipMaps { get; }
 
 		/// <summary>
-		/// Returns <see cref="OverrideHeight"/> if it is > 0. Otherwise returns <see cref="Height"/>
+		/// Texture data type
 		/// </summary>
-		public int RealHeight => OverrideHeight == 0 ? Height : OverrideHeight;
+		public TextureType TextureType => TextureType.RGBA32;
 
 
 		/// <summary>
 		/// Returns the image in RGBA32 format.
 		/// </summary>
-		/// <returns>RGBA32 formatted byte array.</returns>
-		public ReadOnlySpan<byte> GetPixelData();
+		/// <param name="mipMapLevel">Mip map level of which to get the data</param>
+		public ReadOnlySpan<byte> GetRGBA32Data(int mipMapLevel = 0);
 
 		/// <summary>
 		/// Checks whether any pixel has an alpha value below 255.
 		/// </summary>
-		/// <returns>Whether any pixel is has an alpha value below 255</returns>
-		public bool CheckIsTransparent()
-		{
-			return TextureUtilities.CheckIsTextureTransparent(GetPixelData());
-		}
+		public bool CheckIsTransparent();
+	}
 
+	/// <summary>
+	/// Texture extension methods
+	/// </summary>
+	public static class TextureExtensions
+	{
+		extension(ITexture tex)
+		{
+			/// <summary>
+			/// Returns <see cref="ITexture.OverrideWidth"/> if it is > 0. Otherwise returns <see cref="ITexture.Width"/>
+			/// </summary>
+			public int RealWidth => tex.OverrideWidth == 0 ? tex.Width : tex.OverrideWidth;
+
+			/// <summary>
+			/// Returns <see cref="ITexture.OverrideHeight"/> if it is > 0. Otherwise returns <see cref="ITexture.Height"/>
+			/// </summary>
+			public int RealHeight => tex.OverrideHeight == 0 ? tex.Height : tex.OverrideHeight;
+
+		}
 	}
 }
