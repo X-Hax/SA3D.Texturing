@@ -1,4 +1,5 @@
-﻿using SA3D.Texturing.ReadOnly;
+﻿using SA3D.Texturing.MipMapping;
+using SA3D.Texturing.ReadOnly;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
@@ -46,9 +47,44 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="texture">The texture to convert.</param>
 		/// <returns>The converted image.</returns>
-		public static Image<A8> ToIndexedImageSharp(this IIndexTexture texture)
+		public static Image<L8> ToIndexedImageSharp(this IIndexTexture texture)
 		{
-			return Image.LoadPixelData<A8>(texture.GetIndexPixelData(), texture.Width, texture.Height);
+			return Image.LoadPixelData<L8>(texture.GetIndexPixelData(), texture.Width, texture.Height);
+		}
+
+		/// <summary>
+		/// Converts a single mip map from a mip map set to an RGBA32 ImageSharp image
+		/// </summary>
+		/// <param name="mipMap">The mip map to convert</param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static Image<Rgba32> ToImageSharp(this IMipMapLevel mipMap)
+		{
+			ReadOnlySpan<byte> data = mipMap.Data;
+
+			if(mipMap.TextureType != TextureType.RGBA32)
+			{
+				bool index4 = mipMap.TextureType == TextureType.Index4;
+				data = TextureUtilities.ApplyPaletteToIndexTexture(ITexturePalette.GetDefaultPalette(index4).GetColorData(), data, index4);
+			}
+
+			return Image.LoadPixelData<Rgba32>(data, mipMap.Width, mipMap.Height);
+		}
+
+		/// <summary>
+		/// Converts a single mip map from a mip map set to an Indexed ImageSharp image
+		/// </summary>
+		/// <param name="mipMap">The mip map to convert</param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static Image<L8> ToIndexedImageSharp(this IMipMapLevel mipMap)
+		{
+			if(mipMap.TextureType == TextureType.RGBA32)
+			{
+				throw new InvalidOperationException("Mip map set does not have an index texture type!");
+			}
+
+			return Image.LoadPixelData<L8>(mipMap.Data, mipMap.Width, mipMap.Height);
 		}
 
 		/// <summary>

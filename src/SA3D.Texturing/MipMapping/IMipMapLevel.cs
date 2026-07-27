@@ -23,6 +23,11 @@ namespace SA3D.Texturing.MipMapping
 		public int Height { get; }
 
 		/// <summary>
+		/// The mip map data texture type
+		/// </summary>
+		public TextureType TextureType { get; }
+
+		/// <summary>
 		/// The mip map level
 		/// </summary>
 		public int Level { get; }

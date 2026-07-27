@@ -70,7 +70,7 @@ namespace SA3D.Texturing.MipMapping
 			int bpp = textureType.GetBytesPerPixel();
 			if(level0Only)
 			{
-				_mipMaps = [new(new byte[width * height * bpp], width, height, 0)];
+				_mipMaps = [new(new byte[width * height * bpp], width, height, TextureType, 0)];
 			}
 			else
 			{
@@ -80,7 +80,7 @@ namespace SA3D.Texturing.MipMapping
 				for(int i = 0; i < sizes.Length; i++)
 				{
 					(int mmWidth, int mmHeight) = sizes[i];
-					_mipMaps[i] = new(new byte[mmWidth * mmHeight * bpp], mmWidth, mmHeight, i);
+					_mipMaps[i] = new(new byte[mmWidth * mmHeight * bpp], mmWidth, mmHeight, TextureType, i);
 				}
 			}
 		}
@@ -92,14 +92,14 @@ namespace SA3D.Texturing.MipMapping
 		/// <returns></returns>
 		public static MipMapSet Copy(IMipMapSet set)
 		{
-			return new([.. set.Select(x => new MipMapLevel(x.Data.ToArray(), x.Width, x.Height, x.Level))], set.TextureType);
+			return new([.. set.Select(x => new MipMapLevel(x.Data.ToArray(), x.Width, x.Height, x.TextureType, x.Level))], set.TextureType);
 		}
 
 
 		/// <inheritdoc/>
 		public IEnumerator<MipMapLevel> GetEnumerator()
 		{
-			return (IEnumerator<MipMapLevel>)_mipMaps.GetEnumerator();
+			return ((IEnumerable<MipMapLevel>)_mipMaps).GetEnumerator();
 		}
 
 		IEnumerator<IMipMapLevel> IEnumerable<IMipMapLevel>.GetEnumerator()

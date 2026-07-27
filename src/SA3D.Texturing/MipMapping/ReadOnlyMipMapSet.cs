@@ -63,7 +63,7 @@ namespace SA3D.Texturing.MipMapping
 			int bpp = textureType.GetBytesPerPixel();
 			if(level0Only)
 			{
-				_mipMaps = [new(new byte[width * height * bpp], width, height, 0)];
+				_mipMaps = [new(new byte[width * height * bpp], width, height, textureType, 0)];
 			}
 			else
 			{
@@ -73,7 +73,7 @@ namespace SA3D.Texturing.MipMapping
 				for(int i = 0; i < sizes.Length; i++)
 				{
 					(int mmWidth, int mmHeight) = sizes[i];
-					_mipMaps[i] = new(new byte[mmWidth * mmHeight * bpp], mmWidth, mmHeight, i);
+					_mipMaps[i] = new(new byte[mmWidth * mmHeight * bpp], mmWidth, mmHeight, textureType, i);
 				}
 			}
 		}
@@ -86,7 +86,7 @@ namespace SA3D.Texturing.MipMapping
 		/// <returns></returns>
 		public static ReadOnlyMipMapSet Copy(IMipMapSet set)
 		{
-			return new([.. set.Select(x => new ReadOnlyMipMapLevel(x.Data.ToArray(), x.Width, x.Height, x.Level))], set.TextureType);
+			return new([.. set.Select(x => new ReadOnlyMipMapLevel(x.Data.ToArray(), x.Width, x.Height, x.TextureType, x.Level))], set.TextureType);
 		}
 
 		/// <summary>
@@ -96,14 +96,19 @@ namespace SA3D.Texturing.MipMapping
 		/// <returns></returns>
 		public static ReadOnlyMipMapSet Wrap(MipMapSet set)
 		{
-			return new([.. set.Select((MipMapLevel x) => new ReadOnlyMipMapLevel(x.Data, x.Width, x.Height, x.Level))], set.TextureType);
+			return new([.. set.Select((MipMapLevel x) => new ReadOnlyMipMapLevel(x.Data, x.Width, x.Height, x.TextureType, x.Level))], set.TextureType);
 		}
 
 
 		/// <inheritdoc/>
 		public IEnumerator<ReadOnlyMipMapLevel> GetEnumerator()
 		{
-			return (IEnumerator<ReadOnlyMipMapLevel>)_mipMaps.GetEnumerator();
+			return ((IEnumerable<ReadOnlyMipMapLevel>)_mipMaps).GetEnumerator();
+		}
+
+		IEnumerator<IMipMapLevel> IEnumerable<IMipMapLevel>.GetEnumerator()
+		{
+			return _mipMaps.Cast<IMipMapLevel>().GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -163,9 +168,5 @@ namespace SA3D.Texturing.MipMapping
 			return Wrap(MipMapSet.GenerateMipMaps(textureData, width, height, inputTextureDataType, outputTextureDataType, out paletteColors, level0Only, dither));
 		}
 
-		IEnumerator<IMipMapLevel> IEnumerable<IMipMapLevel>.GetEnumerator()
-		{
-			throw new NotImplementedException();
-		}
 	}
 }

@@ -19,16 +19,20 @@ namespace SA3D.Texturing.MipMapping
 		public int Height { get; }
 
 		/// <inheritdoc/>
+		public TextureType TextureType { get; }
+
+		/// <inheritdoc/>
 		public int Level { get; }
 
 		ReadOnlySpan<byte> IMipMapLevel.Data => Data;
 
 
-		internal MipMapLevel(byte[] data, int width, int height, int level)
+		internal MipMapLevel(byte[] data, int width, int height, TextureType textureType, int level)
 		{
 			Data = data;
 			Width = width;
 			Height = height;
+			TextureType = textureType;
 			Level = level;
 		}
 	}
