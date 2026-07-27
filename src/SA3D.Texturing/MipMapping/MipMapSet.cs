@@ -88,7 +88,6 @@ namespace SA3D.Texturing.MipMapping
 		/// <summary>
 		/// Creates a copy from another mip map set
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
 		/// <param name="set"></param>
 		/// <returns></returns>
 		public static MipMapSet Copy(IMipMapSet set)
