@@ -6,7 +6,6 @@ using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace SA3D.Texturing.MipMapping
@@ -14,28 +13,44 @@ namespace SA3D.Texturing.MipMapping
 	/// <summary>
 	/// Set of mip maps
 	/// </summary>
-	public sealed class MipMapSet : IMipMapSet
+	public sealed class MipMapSet : IMipMapSet<MipMapLevel>
 	{
-		/// <summary>
-		/// Mip map levels
-		/// </summary>
-		public ReadOnlyCollection<MipMapLevel> MipMapLevels { get; }
+		private readonly MipMapLevel[] _mipMaps;
 
 		/// <inheritdoc/>
 		public TextureType TextureType { get; }
 
 		/// <inheritdoc/>
-		public int LevelCount => MipMapLevels.Count;
-
+		public int LevelCount => _mipMaps.Length;
 
 		/// <summary>
-		/// Creates a mip map set off another mip map set
+		/// Get mip map texture for the specific level
 		/// </summary>
-		/// <param name="base"></param>
-		public MipMapSet(IMipMapSet @base)
+		/// <param name="level">Level for which to retrieve the mip map</param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
+		public MipMapLevel this[int level]
 		{
-			MipMapLevels = new([.. @base.Select(x => new MipMapLevel(x.Data.ToArray(), x.Width, x.Height, x.Level))]);
-			TextureType = @base.TextureType;
+			get
+			{
+				if(level > 0 && LevelCount == 1)
+				{
+					throw new ArgumentOutOfRangeException(nameof(level), $"Tried accessing mip map level {level}, but texture has no (additional) mip maps!");
+				}
+				else if(LevelCount <= level)
+				{
+					throw new ArgumentOutOfRangeException(nameof(level), $"Tried accessing mip map level {level}, but texture only has mip maps available up to level {LevelCount - 1}!");
+				}
+
+				return _mipMaps[level];
+			}
+		}
+
+
+		private MipMapSet(MipMapLevel[] mipMaps, TextureType textureType)
+		{
+			_mipMaps = mipMaps;
+			TextureType = textureType;
 		}
 
 		/// <summary>
@@ -49,36 +64,45 @@ namespace SA3D.Texturing.MipMapping
 		{
 			TextureType = textureType;
 
-			MipMapLevel[] levels;
 			int bpp = textureType.GetBytesPerPixel();
 			if(level0Only)
 			{
-				levels = [new(new byte[width * height * bpp], width, height, 0)];
+				_mipMaps = [new(new byte[width * height * bpp], width, height, 0)];
 			}
 			else
 			{
 				(int, int)[] sizes = MipMapUtils.GetMipMapSizes(width, height);
-				levels = new MipMapLevel[sizes.Length];
+				_mipMaps = new MipMapLevel[sizes.Length];
 
 				for(int i = 0; i < sizes.Length; i++)
 				{
 					(int mmWidth, int mmHeight) = sizes[i];
-					levels[i] = new(new byte[mmWidth * mmHeight * bpp], mmWidth, mmHeight, i);
+					_mipMaps[i] = new(new byte[mmWidth * mmHeight * bpp], mmWidth, mmHeight, i);
 				}
 			}
+		}
 
-			MipMapLevels = new(levels);
+		/// <summary>
+		/// Creates a copy from another mip map set
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="set"></param>
+		/// <returns></returns>
+		public static MipMapSet Copy<T>(IMipMapSet<T> set) where T : IMipMapLevel
+		{
+			return new([.. set.Select(x => new MipMapLevel(x.Data.ToArray(), x.Width, x.Height, x.Level))], set.TextureType);
 		}
 
 
-		IEnumerator<IMipMapLevel> IEnumerable<IMipMapLevel>.GetEnumerator()
+		/// <inheritdoc/>
+		public IEnumerator<MipMapLevel> GetEnumerator()
 		{
-			return MipMapLevels.Cast<IMipMapLevel>().GetEnumerator();
+			return (IEnumerator<MipMapLevel>)_mipMaps.GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return MipMapLevels.GetEnumerator();
+			return GetEnumerator();
 		}
 
 
@@ -131,7 +155,7 @@ namespace SA3D.Texturing.MipMapping
 			}
 
 			Image<C> image = Image.LoadPixelData<C>(textureData, width, height);
-			foreach(MipMapLevel mipmap in result.MipMapLevels)
+			foreach(MipMapLevel mipmap in result)
 			{
 				image.Mutate(x => x.Resize(mipmap.Width, mipmap.Height, resampler));
 
@@ -246,5 +270,6 @@ namespace SA3D.Texturing.MipMapping
 				level0Only
 			);
 		}
+
 	}
 }

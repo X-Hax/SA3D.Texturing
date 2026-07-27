@@ -6,7 +6,7 @@ namespace SA3D.Texturing
 	/// <summary>
 	/// RGBA32 texture.
 	/// </summary>
-	public sealed class Texture : ITexture, IMipMapped
+	public sealed class Texture : ITexture, IMipMapped<MipMapLevel>
 	{
 		/// <summary>
 		/// Texture data
@@ -46,7 +46,7 @@ namespace SA3D.Texturing
 		/// <inheritdoc/>
 		public bool HasMipMaps => TextureData.LevelCount > 1;
 
-		IMipMapSet IMipMapped.MipMaps => TextureData;
+		IMipMapSet<MipMapLevel> IMipMapped<MipMapLevel>.MipMaps => TextureData;
 
 
 		/// <summary>
@@ -86,16 +86,7 @@ namespace SA3D.Texturing
 		/// <inheritdoc/>
 		public ReadOnlySpan<byte> GetRGBA32Data(int mipMapLevel = 0)
 		{
-			if(mipMapLevel > 0 && !HasMipMaps)
-			{
-				throw new ArgumentOutOfRangeException(nameof(mipMapLevel), $"Tried accessing mip map level {mipMapLevel}, but texture has no mip maps!");
-			}
-			else if(TextureData.LevelCount <= mipMapLevel)
-			{
-				throw new ArgumentOutOfRangeException(nameof(mipMapLevel), $"Tried accessing mip map level {mipMapLevel}, but texture only has mip maps available up to level {TextureData.LevelCount - 1}!");
-			}
-
-			return TextureData.MipMapLevels[mipMapLevel].Data;
+			return TextureData[mipMapLevel].Data;
 		}
 
 		/// <inheritdoc/>

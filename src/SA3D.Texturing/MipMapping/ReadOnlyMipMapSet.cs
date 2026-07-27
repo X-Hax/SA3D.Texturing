@@ -5,7 +5,6 @@ using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace SA3D.Texturing.MipMapping
@@ -13,34 +12,38 @@ namespace SA3D.Texturing.MipMapping
 	/// <summary>
 	/// Read only mip map set
 	/// </summary>
-	public sealed class ReadOnlyMipMapSet : IMipMapSet
+	public sealed class ReadOnlyMipMapSet : IMipMapSet<ReadOnlyMipMapLevel>
 	{
-		/// <summary>
-		/// Mip map levels
-		/// </summary>
-		public ReadOnlyCollection<ReadOnlyMipMapLevel> MipMapLevels { get; }
+		private readonly ReadOnlyMipMapLevel[] _mipMaps;
 
 		/// <inheritdoc/>
 		public TextureType TextureType { get; }
 
 		/// <inheritdoc/>
-		public int LevelCount => MipMapLevels.Count;
+		public int LevelCount => _mipMaps.Length;
 
-
-		private ReadOnlyMipMapSet(ReadOnlyCollection<ReadOnlyMipMapLevel> mipMapLevels, TextureType textureType)
+		/// <inheritdoc/>
+		public ReadOnlyMipMapLevel this[int level]
 		{
-			MipMapLevels = mipMapLevels;
-			TextureType = textureType;
+			get
+			{
+				if(level > 0 && LevelCount == 1)
+				{
+					throw new ArgumentOutOfRangeException(nameof(level), $"Tried accessing mip map level {level}, but texture has no (additional) mip maps!");
+				}
+				else if(LevelCount <= level)
+				{
+					throw new ArgumentOutOfRangeException(nameof(level), $"Tried accessing mip map level {level}, but texture only has mip maps available up to level {LevelCount - 1}!");
+				}
+
+				return _mipMaps[level];
+			}
 		}
 
-		/// <summary>
-		/// Creates a mip map set off another mip map set
-		/// </summary>
-		/// <param name="base"></param>
-		public ReadOnlyMipMapSet(IMipMapSet @base)
+		private ReadOnlyMipMapSet(ReadOnlyMipMapLevel[] mipMaps, TextureType textureType)
 		{
-			MipMapLevels = new([.. @base.Select(x => new ReadOnlyMipMapLevel(x.Data.ToArray(), x.Width, x.Height, x.Level))]);
-			TextureType = @base.TextureType;
+			_mipMaps = mipMaps;
+			TextureType = textureType;
 		}
 
 		/// <summary>
@@ -54,36 +57,44 @@ namespace SA3D.Texturing.MipMapping
 		{
 			TextureType = textureType;
 
-			ReadOnlyMipMapLevel[] levels;
 			int bpp = textureType.GetBytesPerPixel();
 			if(level0Only)
 			{
-				levels = [new(new byte[width * height * bpp], width, height, 0)];
+				_mipMaps = [new(new byte[width * height * bpp], width, height, 0)];
 			}
 			else
 			{
 				(int, int)[] sizes = MipMapUtils.GetMipMapSizes(width, height);
-				levels = new ReadOnlyMipMapLevel[sizes.Length];
+				_mipMaps = new ReadOnlyMipMapLevel[sizes.Length];
 
 				for(int i = 0; i < sizes.Length; i++)
 				{
 					(int mmWidth, int mmHeight) = sizes[i];
-					levels[i] = new(new byte[mmWidth * mmHeight * bpp], mmWidth, mmHeight, i);
+					_mipMaps[i] = new(new byte[mmWidth * mmHeight * bpp], mmWidth, mmHeight, i);
 				}
 			}
-
-			MipMapLevels = new(levels);
 		}
 
-
-		IEnumerator<IMipMapLevel> IEnumerable<IMipMapLevel>.GetEnumerator()
+		/// <summary>
+		/// Creates a copy from another mip map set
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="set"></param>
+		/// <returns></returns>
+		public static ReadOnlyMipMapSet Copy<T>(IMipMapSet<T> set) where T : IMipMapLevel
 		{
-			return MipMapLevels.Cast<IMipMapLevel>().GetEnumerator();
+			return new([.. set.Select(x => new ReadOnlyMipMapLevel(x.Data.ToArray(), x.Width, x.Height, x.Level))], set.TextureType);
+		}
+
+		/// <inheritdoc/>
+		public IEnumerator<ReadOnlyMipMapLevel> GetEnumerator()
+		{
+			return (IEnumerator<ReadOnlyMipMapLevel>)_mipMaps.GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return MipMapLevels.GetEnumerator();
+			return GetEnumerator();
 		}
 
 
@@ -111,7 +122,7 @@ namespace SA3D.Texturing.MipMapping
 			bool level0Only = false) where C : unmanaged, IPixel<C>
 		{
 			MipMapSet mipmaps = MipMapSet.GenerateMipMaps(textureData, width, height, inputTextureDataType, outputTextureDataType, indexQuantizer, resampler, level0Only);
-			return new(new ReadOnlyCollection<ReadOnlyMipMapLevel>([.. mipmaps.MipMapLevels.Select(x => new ReadOnlyMipMapLevel(x.Data, x.Width, x.Height, x.Level))]), mipmaps.TextureType);
+			return new([.. mipmaps.Select(x => new ReadOnlyMipMapLevel(x.Data, x.Width, x.Height, x.Level))], mipmaps.TextureType);
 		}
 
 		/// <summary>
@@ -137,7 +148,7 @@ namespace SA3D.Texturing.MipMapping
 			bool dither = true)
 		{
 			MipMapSet mipmaps = MipMapSet.GenerateMipMaps(textureData, width, height, inputTextureDataType, outputTextureDataType, out paletteColors, level0Only, dither);
-			return new(new ReadOnlyCollection<ReadOnlyMipMapLevel>([.. mipmaps.MipMapLevels.Select(x => new ReadOnlyMipMapLevel(x.Data, x.Width, x.Height, x.Level))]), mipmaps.TextureType);
+			return new([.. mipmaps.Select(x => new ReadOnlyMipMapLevel(x.Data, x.Width, x.Height, x.Level))], mipmaps.TextureType);
 		}
 	}
 }

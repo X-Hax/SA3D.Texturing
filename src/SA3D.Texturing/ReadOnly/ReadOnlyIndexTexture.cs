@@ -6,12 +6,12 @@ namespace SA3D.Texturing.ReadOnly
 	/// <summary>
 	/// Read-only index texture
 	/// </summary>
-	public sealed class ReadOnlyIndexTexture : IIndexTexture, IMipMapped
+	public sealed class ReadOnlyIndexTexture : IIndexTexture, IMipMapped<ReadOnlyMipMapLevel>
 	{
 		/// <summary>
 		/// Texture data
 		/// </summary>
-		public MipMapSet TextureData { get; }
+		public ReadOnlyMipMapSet TextureData { get; }
 
 		/// <inheritdoc/>
 		public string Name { get; init; }
@@ -44,14 +44,14 @@ namespace SA3D.Texturing.ReadOnly
 		/// <inheritdoc/>
 		public bool HasMipMaps => TextureData.LevelCount > 1;
 
-		IMipMapSet IMipMapped.MipMaps => TextureData;
+		IMipMapSet<ReadOnlyMipMapLevel> IMipMapped<ReadOnlyMipMapLevel>.MipMaps => TextureData;
 
 
 		/// <summary>
 		/// Creates a new index texture off a mip map set
 		/// </summary>
 		/// <param name="textureData">Texture data to use</param>
-		public ReadOnlyIndexTexture(MipMapSet textureData)
+		public ReadOnlyIndexTexture(ReadOnlyMipMapSet textureData)
 		{
 			if(textureData.TextureType is not TextureType.Index4 and not TextureType.Index8)
 			{
@@ -71,7 +71,7 @@ namespace SA3D.Texturing.ReadOnly
 		/// <param name="isIndex4">Whether the data uses 4 bit- instead of 8 bit indices</param>
 		/// <param name="generateMipMaps">Whether to generate mip maps</param>
 		public ReadOnlyIndexTexture(ReadOnlySpan<byte> data, int width, int height, bool isIndex4, bool generateMipMaps = false)
-			: this(MipMapSet.GenerateMipMaps(data, width, height, isIndex4 ? TextureType.Index4 : TextureType.Index8, isIndex4 ? TextureType.Index4 : TextureType.Index8, out _, !generateMipMaps)) { }
+			: this(ReadOnlyMipMapSet.GenerateMipMaps(data, width, height, isIndex4 ? TextureType.Index4 : TextureType.Index8, isIndex4 ? TextureType.Index4 : TextureType.Index8, out _, !generateMipMaps)) { }
 
 		/// <summary>
 		/// Creates a new texture off another texture
@@ -97,16 +97,7 @@ namespace SA3D.Texturing.ReadOnly
 		/// <inheritdoc/>
 		public ReadOnlySpan<byte> GetIndexPixelData(int mipMapLevel = 0)
 		{
-			if(mipMapLevel > 0 && !HasMipMaps)
-			{
-				throw new ArgumentOutOfRangeException(nameof(mipMapLevel), $"Tried accessing mip map level {mipMapLevel}, but texture has no mip maps!");
-			}
-			else if(TextureData.LevelCount <= mipMapLevel)
-			{
-				throw new ArgumentOutOfRangeException(nameof(mipMapLevel), $"Tried accessing mip map level {mipMapLevel}, but texture only has mip maps available up to level {TextureData.LevelCount - 1}!");
-			}
-
-			return TextureData.MipMapLevels[mipMapLevel].Data;
+			return TextureData[mipMapLevel].Data;
 		}
 
 		/// <inheritdoc/>
