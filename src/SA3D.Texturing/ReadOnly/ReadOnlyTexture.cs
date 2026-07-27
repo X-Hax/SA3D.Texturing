@@ -6,7 +6,7 @@ namespace SA3D.Texturing.ReadOnly
 	/// <summary>
 	/// Readonly RGBA32 color texture
 	/// </summary>
-	public sealed class ReadOnlyTexture : ITexture, IMipMapped<ReadOnlyMipMapLevel>
+	public sealed class ReadOnlyTexture : ITexture, IMipMapped
 	{
 		/// <summary>
 		/// Texture data
@@ -34,7 +34,7 @@ namespace SA3D.Texturing.ReadOnly
 		/// <inheritdoc/>
 		public bool HasMipMaps => TextureData.LevelCount > 1;
 
-		IMipMapSet<ReadOnlyMipMapLevel> IMipMapped<ReadOnlyMipMapLevel>.MipMaps => TextureData;
+		IMipMapSet IMipMapped.MipMaps => TextureData;
 
 
 		/// <summary>

@@ -13,7 +13,7 @@ namespace SA3D.Texturing.MipMapping
 	/// <summary>
 	/// Set of mip maps
 	/// </summary>
-	public sealed class MipMapSet : IMipMapSet<MipMapLevel>
+	public sealed class MipMapSet : IMipMapSet, IEnumerable<MipMapLevel>
 	{
 		private readonly MipMapLevel[] _mipMaps;
 
@@ -22,6 +22,7 @@ namespace SA3D.Texturing.MipMapping
 
 		/// <inheritdoc/>
 		public int LevelCount => _mipMaps.Length;
+
 
 		/// <summary>
 		/// Get mip map texture for the specific level
@@ -45,6 +46,8 @@ namespace SA3D.Texturing.MipMapping
 				return _mipMaps[level];
 			}
 		}
+
+		IMipMapLevel IMipMapSet.this[int level] => this[level];
 
 
 		private MipMapSet(MipMapLevel[] mipMaps, TextureType textureType)
@@ -88,7 +91,7 @@ namespace SA3D.Texturing.MipMapping
 		/// <typeparam name="T"></typeparam>
 		/// <param name="set"></param>
 		/// <returns></returns>
-		public static MipMapSet Copy<T>(IMipMapSet<T> set) where T : IMipMapLevel
+		public static MipMapSet Copy(IMipMapSet set)
 		{
 			return new([.. set.Select(x => new MipMapLevel(x.Data.ToArray(), x.Width, x.Height, x.Level))], set.TextureType);
 		}
@@ -98,6 +101,11 @@ namespace SA3D.Texturing.MipMapping
 		public IEnumerator<MipMapLevel> GetEnumerator()
 		{
 			return (IEnumerator<MipMapLevel>)_mipMaps.GetEnumerator();
+		}
+
+		IEnumerator<IMipMapLevel> IEnumerable<IMipMapLevel>.GetEnumerator()
+		{
+			return _mipMaps.Cast<IMipMapLevel>().GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -270,6 +278,5 @@ namespace SA3D.Texturing.MipMapping
 				level0Only
 			);
 		}
-
 	}
 }

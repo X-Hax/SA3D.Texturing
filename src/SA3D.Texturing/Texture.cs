@@ -6,7 +6,7 @@ namespace SA3D.Texturing
 	/// <summary>
 	/// RGBA32 texture.
 	/// </summary>
-	public sealed class Texture : ITexture, IMipMapped<MipMapLevel>
+	public sealed class Texture : ITexture, IMipMapped
 	{
 		/// <summary>
 		/// Texture data
@@ -46,7 +46,7 @@ namespace SA3D.Texturing
 		/// <inheritdoc/>
 		public bool HasMipMaps => TextureData.LevelCount > 1;
 
-		IMipMapSet<MipMapLevel> IMipMapped<MipMapLevel>.MipMaps => TextureData;
+		IMipMapSet IMipMapped.MipMaps => TextureData;
 
 
 		/// <summary>

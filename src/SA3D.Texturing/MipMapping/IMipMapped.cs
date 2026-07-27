@@ -3,11 +3,11 @@
 	/// <summary>
 	/// Interface for objects that have mip map data
 	/// </summary>
-	public interface IMipMapped<T> where T : IMipMapLevel
+	public interface IMipMapped
 	{
 		/// <summary>
 		/// Mip map data
 		/// </summary>
-		public IMipMapSet<T> MipMaps { get; }
+		public IMipMapSet MipMaps { get; }
 	}
 }

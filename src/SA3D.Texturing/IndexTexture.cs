@@ -6,7 +6,7 @@ namespace SA3D.Texturing
 	/// <summary>
 	/// Texture consisting of single byte pixels that refer to a palette
 	/// </summary>
-	public sealed class IndexTexture : IIndexTexture, IMipMapped<MipMapLevel>
+	public sealed class IndexTexture : IIndexTexture, IMipMapped
 	{
 		/// <summary>
 		/// Texture data
@@ -56,7 +56,7 @@ namespace SA3D.Texturing
 		/// <inheritdoc/>
 		public bool HasMipMaps => TextureData.LevelCount > 1;
 
-		IMipMapSet<MipMapLevel> IMipMapped<MipMapLevel>.MipMaps => TextureData;
+		IMipMapSet IMipMapped.MipMaps => TextureData;
 
 
 		/// <summary>

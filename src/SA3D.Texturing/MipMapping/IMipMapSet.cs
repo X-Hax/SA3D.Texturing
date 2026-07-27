@@ -7,7 +7,7 @@ namespace SA3D.Texturing.MipMapping
 	/// <summary>
 	/// Mip map set interface
 	/// </summary>
-	public interface IMipMapSet<T> : IEnumerable<T> where T : IMipMapLevel
+	public interface IMipMapSet : IEnumerable<IMipMapLevel>
 	{
 		/// <summary>
 		/// Number of levels in the set
@@ -25,7 +25,7 @@ namespace SA3D.Texturing.MipMapping
 		/// <param name="level">Level for which to retrieve the mip map</param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		public T this[int level] { get; }
+		public IMipMapLevel this[int level] { get; }
 	}
 
 	/// <summary>
@@ -33,7 +33,7 @@ namespace SA3D.Texturing.MipMapping
 	/// </summary>
 	public static class MipMapSetExtensions
 	{
-		extension<T>(IMipMapSet<T> set) where T : IMipMapLevel
+		extension(IMipMapSet set)
 		{
 			/// <summary>
 			/// Texture width at mip map level 0
