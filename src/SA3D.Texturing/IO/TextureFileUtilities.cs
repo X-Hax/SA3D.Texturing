@@ -587,7 +587,7 @@ namespace SA3D.Texturing.IO
 		{
 			foreach(ITexture texture in textureSet.Textures)
 			{
-				writer.WriteLine($"{texture.GlobalIndex},{texture.Name}{nameSuffix},{texture.OverrideWidth}x{texture.OverrideHeight}");
+				writer.WriteLine($"{texture.GlobalIndex},{texture.Name}{nameSuffix},{texture.RealWidth}x{texture.RealHeight}");
 			}
 		}
 
