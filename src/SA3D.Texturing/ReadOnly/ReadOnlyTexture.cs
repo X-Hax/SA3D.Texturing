@@ -1,35 +1,23 @@
 ﻿using SA3D.Texturing.MipMapping;
 using System;
 
-namespace SA3D.Texturing
+namespace SA3D.Texturing.ReadOnly
 {
 	/// <summary>
-	/// RGBA32 texture.
+	/// Readonly RGBA32 color texture
 	/// </summary>
-	public sealed class Texture : ITexture, IMipMapped
+	public sealed class ReadOnlyTexture : ITexture, IMipMapped
 	{
 		/// <summary>
 		/// Texture data
 		/// </summary>
-		public MipMapSet TextureData
-		{
-			get;
-			set
-			{
-				if(value.TextureType != TextureType.RGBA32)
-				{
-					throw new ArgumentException("The texture-datas type is not RGBA32!", nameof(value));
-				}
-
-				field = value;
-			}
-		}
+		public ReadOnlyMipMapSet TextureData { get; }
 
 		/// <inheritdoc/>
-		public string Name { get; set; }
+		public string Name { get; init; }
 
 		/// <inheritdoc/>
-		public uint GlobalIndex { get; set; }
+		public uint GlobalIndex { get; init; }
 
 		/// <inheritdoc/>
 		public int Width => TextureData.BaseWidth;
@@ -38,10 +26,10 @@ namespace SA3D.Texturing
 		public int Height => TextureData.BaseHeight;
 
 		/// <inheritdoc/>
-		public int OverrideWidth { get; set; }
+		public int OverrideWidth { get; init; }
 
 		/// <inheritdoc/>
-		public int OverrideHeight { get; set; }
+		public int OverrideHeight { get; init; }
 
 		/// <inheritdoc/>
 		public bool HasMipMaps => TextureData.LevelCount > 1;
@@ -53,8 +41,13 @@ namespace SA3D.Texturing
 		/// Creates a new texture off a mip map set
 		/// </summary>
 		/// <param name="textureData">Texture data to use</param>
-		public Texture(MipMapSet textureData)
+		public ReadOnlyTexture(ReadOnlyMipMapSet textureData)
 		{
+			if(textureData.TextureType != TextureType.RGBA32)
+			{
+				throw new ArgumentException("The texture-datas type is not RGBA32!", nameof(textureData));
+			}
+
 			Name = string.Empty;
 			TextureData = textureData;
 		}
@@ -66,8 +59,8 @@ namespace SA3D.Texturing
 		/// <param name="width">Width of the texture</param>
 		/// <param name="height">Height of the texture</param>
 		/// <param name="generateMipMaps">Whether to generate mip maps</param>
-		public Texture(ReadOnlySpan<byte> data, int width, int height, bool generateMipMaps = false)
-			: this(MipMapSet.GenerateMipMaps(data, width, height, TextureType.RGBA32, TextureType.RGBA32, out _, !generateMipMaps)) { }
+		public ReadOnlyTexture(ReadOnlySpan<byte> data, int width, int height, bool generateMipMaps = false)
+			: this(ReadOnlyMipMapSet.GenerateMipMaps(data, width, height, TextureType.RGBA32, TextureType.RGBA32, out _, !generateMipMaps)) { }
 
 		/// <summary>
 		/// Creates a new texture off another texture
@@ -75,7 +68,7 @@ namespace SA3D.Texturing
 		/// <param name="texture">Texture to use</param>
 		/// <param name="generateMipMaps">Whether to generate mip maps</param>
 		/// <returns></returns>
-		public Texture(ITexture texture, bool generateMipMaps = false)
+		public ReadOnlyTexture(ITexture texture, bool generateMipMaps = false)
 			: this(texture.GetRGBA32Data(), texture.Width, texture.Height, generateMipMaps)
 		{
 			OverrideWidth = texture.OverrideWidth;
@@ -108,6 +101,5 @@ namespace SA3D.Texturing
 				return $"\"{Name}\": {Width}x{Height}, ({this.RealWidth}x{this.RealWidth}) {GlobalIndex}";
 			}
 		}
-
 	}
 }

@@ -1,6 +1,7 @@
-﻿using SixLabors.ImageSharp;
+﻿using SA3D.Texturing.MipMapping;
+using SA3D.Texturing.ReadOnly;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using System;
 
 namespace SA3D.Texturing
@@ -15,9 +16,9 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="texture">The texture to convert.</param>
 		/// <returns>The converted image.</returns>
-		public static Image<Rgba32> ToImageSharp(this Texture texture)
+		public static Image<Rgba32> ToImageSharp(this ITexture texture)
 		{
-			return Image.LoadPixelData<Rgba32>(texture.GetColorPixels(), texture.Width, texture.Height);
+			return Image.LoadPixelData<Rgba32>(texture.GetRGBA32Data(), texture.Width, texture.Height);
 		}
 
 		/// <summary>
@@ -27,7 +28,7 @@ namespace SA3D.Texturing
 		/// <param name="rowWidth">Number of pixels a single row should occupy.</param>
 		/// <returns>The converted image.</returns>
 		/// <exception cref="ArgumentException"></exception>
-		public static Image<Rgba32> ToImageSharp(this TexturePalette palette, int? rowWidth = null)
+		public static Image<Rgba32> ToImageSharp(this ITexturePalette palette, int? rowWidth = null)
 		{
 			if(rowWidth == null)
 			{
@@ -38,7 +39,7 @@ namespace SA3D.Texturing
 				throw new ArgumentException($"Palette Width ({palette.Width}) is not a multiple of specified row width ({rowWidth})!");
 			}
 
-			return Image.LoadPixelData<Rgba32>(palette.ColorData, rowWidth.Value, palette.Width / rowWidth.Value);
+			return Image.LoadPixelData<Rgba32>(palette.GetColorData(), rowWidth.Value, palette.Width / rowWidth.Value);
 		}
 
 		/// <summary>
@@ -46,9 +47,44 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="texture">The texture to convert.</param>
 		/// <returns>The converted image.</returns>
-		public static Image<A8> ToIndexedImageSharp(this IndexTexture texture)
+		public static Image<L8> ToIndexedImageSharp(this IIndexTexture texture)
 		{
-			return Image.LoadPixelData<A8>(texture.Data, texture.Width, texture.Height);
+			return Image.LoadPixelData<L8>(texture.GetIndexPixelData(), texture.Width, texture.Height);
+		}
+
+		/// <summary>
+		/// Converts a single mip map from a mip map set to an RGBA32 ImageSharp image
+		/// </summary>
+		/// <param name="mipMap">The mip map to convert</param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static Image<Rgba32> ToImageSharp(this IMipMapLevel mipMap)
+		{
+			ReadOnlySpan<byte> data = mipMap.Data;
+
+			if(mipMap.TextureType != TextureType.RGBA32)
+			{
+				bool index4 = mipMap.TextureType == TextureType.Index4;
+				data = TextureUtilities.ApplyPaletteToIndexTexture(ITexturePalette.GetDefaultPalette(index4).GetColorData(), data, index4);
+			}
+
+			return Image.LoadPixelData<Rgba32>(data, mipMap.Width, mipMap.Height);
+		}
+
+		/// <summary>
+		/// Converts a single mip map from a mip map set to an Indexed ImageSharp image
+		/// </summary>
+		/// <param name="mipMap">The mip map to convert</param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static Image<L8> ToIndexedImageSharp(this IMipMapLevel mipMap)
+		{
+			if(mipMap.TextureType == TextureType.RGBA32)
+			{
+				throw new InvalidOperationException("Mip map set does not have an index texture type!");
+			}
+
+			return Image.LoadPixelData<L8>(mipMap.Data, mipMap.Width, mipMap.Height);
 		}
 
 		/// <summary>
@@ -56,11 +92,11 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="image">The image to convert.</param>
 		/// <returns>The converted texture.</returns>
-		public static ColorTexture ToTexture(this Image<Rgba32> image)
+		public static ITexture ToTexture(this Image<Rgba32> image)
 		{
 			byte[] data = new byte[image.Width * image.Height * 4];
 			image.CopyPixelDataTo(new Span<byte>(data));
-			return new ColorTexture(image.Width, image.Height, data);
+			return new ReadOnlyTexture(data, image.Width, image.Height);
 		}
 
 		/// <summary>
@@ -68,39 +104,11 @@ namespace SA3D.Texturing
 		/// </summary>
 		/// <param name="image">The image to convert.</param>
 		/// <returns>The converted palette.</returns>
-		public static TexturePalette ToPalette(this Image<Rgba32> image)
+		public static ITexturePalette ToPalette(this Image<Rgba32> image)
 		{
 			byte[] data = new byte[image.Width * image.Height * 4];
 			image.CopyPixelDataTo(new Span<byte>(data));
-			return new TexturePalette(data);
-		}
-
-		/// <summary>
-		/// Creates a palette quantizer that can be used to convert a color image to an indexed image.
-		/// </summary>
-		/// <param name="palette">The palette to match the colors against.</param>
-		/// <param name="width">The number of colors from the palette to use.</param>
-		/// <param name="offset">The offset at which to start using colors from the palette.</param>
-		/// <param name="dither">Whether to allow dithering when quantizing.</param>
-		/// <returns>The quantizer.</returns>
-		public static PaletteQuantizer CreatePaletteQuantizer(this TexturePalette palette, int width, int offset, bool dither)
-		{
-			Color[] paletteColors = new Color[width];
-			ReadOnlySpan<byte> colorData = palette.ColorData;
-
-			for(int i = 0; i < width; i++)
-			{
-				ReadOnlySpan<byte> color = colorData.Slice((offset + i) * 4, 4);
-				paletteColors[i] = new Rgba32(color[0], color[1], color[2], color[3]);
-			}
-
-			return new PaletteQuantizer(
-				new(paletteColors),
-				new QuantizerOptions()
-				{
-					MaxColors = width,
-					Dither = dither ? QuantizerConstants.DefaultDither : null,
-				});
+			return new ReadOnlyTexturePalette(data);
 		}
 	}
 }

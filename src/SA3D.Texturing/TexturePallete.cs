@@ -5,95 +5,63 @@ namespace SA3D.Texturing
 	/// <summary>
 	/// Texture palette to be used with Index textures
 	/// </summary>
-	public class TexturePalette
+	public sealed class TexturePalette : ITexturePalette
 	{
 		/// <summary>
-		/// The default grayscale palette for rendering 8 bit index textures.
+		/// Color data of the palette
 		/// </summary>
-		public static TexturePalette Index8Palette { get; }
+		public byte[] ColorData { get; private set; }
 
-		/// <summary>
-		/// The default grayscale palette for rendering 4 bit index textures.
-		/// </summary>
-		public static TexturePalette Index4Palette { get; }
-
-
-		/// <summary>
-		/// Pixeldata in the palette
-		/// </summary>
-		private readonly byte[] _colorData;
-
-		/// <summary>
-		/// Name of the palette
-		/// </summary>
+		/// <inheritdoc/>
 		public string Name { get; set; }
 
-		/// <summary>
-		/// Number of pixels in this palette
-		/// </summary>
-		public int Width => _colorData.Length / 4;
+		/// <inheritdoc/>
+		public int Width => ColorData.Length / 4;
+
 
 		/// <summary>
-		/// Pixeldata in the palette
-		/// </summary>
-		public ReadOnlySpan<byte> ColorData
-			=> new(_colorData);
-
-		static TexturePalette()
-		{
-			byte[] index4 = new byte[64];
-			byte[] index8 = new byte[1024];
-
-			for(int i = 0; i < 256; i++)
-			{
-				int index = i * 4;
-				byte value = (byte)i;
-				index8[index] = value;
-				index8[index + 1] = value;
-				index8[index + 2] = value;
-				index8[index + 3] = 0xFF;
-			}
-
-			for(int i = 0; i < 16; i++)
-			{
-				int index = i * 4;
-				byte value = (byte)(i | (i << 4));
-				index4[index] = value;
-				index4[index + 1] = value;
-				index4[index + 2] = value;
-				index4[index + 3] = 0xFF;
-			}
-
-			Index4Palette = new(index4);
-			Index8Palette = new(index8);
-		}
-
-		/// <summary>
-		/// Create a new palette off pixel data
+		/// Create a new palette off color data
 		/// </summary>
 		/// <param name="name">Name of the palette</param>
-		/// <param name="colorData">Color pixels</param>
+		/// <param name="colorData">Palette colors</param>
 		public TexturePalette(string name, byte[] colorData)
 		{
+			if(colorData.Length % 4 != 0)
+			{
+				throw new ArgumentException("Data has an invalid length; Must be multiple of 4!", nameof(ColorData));
+			}
+
 			Name = name;
-			_colorData = colorData;
+			ColorData = colorData;
 		}
 
 		/// <summary>
 		/// Create a new palette off pixel data
 		/// </summary>
-		/// <param name="colorData">Color pixels</param>
+		/// <param name="colorData">Palette Colors</param>
 		public TexturePalette(byte[] colorData) : this(string.Empty, colorData) { }
 
 
-		/// <summary>
-		/// Returns either <see cref="Index4Palette"/> or <see cref="Index8Palette"/> based on <paramref name="index4"/>.
-		/// </summary>
-		/// <param name="index4">Specifies the default palette to get.</param>
-		/// <returns>The default palette.</returns>
-		public static TexturePalette GetDefaultPalette(bool index4)
+		/// <inheritdoc/>
+		public ReadOnlySpan<byte> GetColorData()
 		{
-			return index4 ? Index4Palette : Index8Palette;
+			return ColorData;
+		}
+
+
+		/// <summary>
+		/// Replaces the palettes color data
+		/// </summary>
+		/// <param name="data"></param>
+		/// <exception cref="ArgumentException"></exception>
+		public void SetColors(byte[] data)
+		{
+			if(data.Length % 4 != 0)
+			{
+				throw new ArgumentException("Data has an invalid length; Must be multiple of 4!", nameof(ColorData));
+			}
+
+			ColorData = data;
 		}
 	}
 }
