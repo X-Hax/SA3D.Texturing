@@ -5,7 +5,7 @@ namespace SA3D.Texturing
 	/// <summary>
 	/// Texture palette to be used with Index textures
 	/// </summary>
-	public class TexturePalette : ITexturePalette
+	public sealed class TexturePalette : ITexturePalette
 	{
 		/// <summary>
 		/// Color data of the palette

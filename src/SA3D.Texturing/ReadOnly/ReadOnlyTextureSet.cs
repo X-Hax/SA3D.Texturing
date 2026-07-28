@@ -6,7 +6,7 @@ namespace SA3D.Texturing.ReadOnly
 	/// <summary>
 	/// Read-only Texture set
 	/// </summary>
-	public class ReadOnlyTextureSet : ITextureSet
+	public sealed class ReadOnlyTextureSet : ITextureSet
 	{
 		/// <inheritdoc/>
 		public IReadOnlyList<ITexture> Textures { get; }

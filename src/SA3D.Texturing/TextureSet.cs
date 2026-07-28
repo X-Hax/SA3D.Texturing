@@ -5,7 +5,7 @@ namespace SA3D.Texturing
 	/// <summary>
 	/// Texture set
 	/// </summary>
-	public class TextureSet : ITextureSet
+	public sealed class TextureSet : ITextureSet
 	{
 		/// <summary>
 		/// Textures of the texture set
