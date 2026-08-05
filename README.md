@@ -1,3 +1,6 @@
+[![NuGet](https://img.shields.io/nuget/v/SA3D.Texturing)](https://www.nuget.org/packages/SA3D.Texturing) 
+[![downloads](https://img.shields.io/nuget/dt/SA3D.Texturing)](https://www.nuget.org/packages/SA3D.Texturing)
+
 # SA3D.Texturing
 SA3D Texture handler library
 
